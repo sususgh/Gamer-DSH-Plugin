@@ -39,3 +39,8 @@ A vision-capable model is required for screenshot understanding. A text-only rea
 Open `desktop-ui/index.html` in a modern browser to inspect the UI prototype. Its telemetry panel intentionally shows “等待连接”; the animated trace is decorative until a real telemetry source is integrated.
 
 See [docs/architecture.md](docs/architecture.md).
+
+
+## Runtime protocol
+
+See [Gamer-Mobile ↔ Gamer-DSH Runtime Protocol v1](docs/runtime-protocol-v1.md) for the pairing, observation, action, telemetry, model failover and companion voice contract.
