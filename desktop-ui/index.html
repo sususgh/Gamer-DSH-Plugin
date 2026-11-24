@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#eaf3f8">
+  <title>Gamer · AI Control Center</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sky-glow"></div>
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">✦</div><div><b>GAMER</b><small>AI CONTROL CENTER</small></div></div>
+    <div class="top-status"><span class="pulse"></span><span id="globalState">等待设备连接</span><span class="tag">DESKTOP</span></div>
+    <button class="icon-btn" aria-label="设置">⚙</button>
+  </header>
+
+  <main class="layout">
+    <section class="hero panel">
+      <div class="hero-copy">
+        <div class="eyebrow">ADVENTURE SYSTEM / 01</div>
+        <h1>让智能，开启下一场冒险。</h1>
+        <p>连接手机 · 感知画面 · 思考决策 · 自动执行</p>
+        <div class="hero-actions"><button class="primary" id="connectBtn">连接设备</button><button class="soft" id="stopBtn">停止自动操作</button></div>
+      </div>
+      <div class="orb-wrap"><div class="orb"><span>✧</span></div><i class="orbit orbit-a"></i><i class="orbit orbit-b"></i><div class="orb-caption">LOCAL AI · EDGE CONTROL</div></div>
+      <div class="hero-foot"><span>✦ 设备桥接 <b id="deviceBadge">未连接</b></span><span>✦ 推理服务 <b id="inferenceBadge">未连接</b></span><span class="prototype">UI 原型 · 等待真实运行时</span></div>
+    </section>
+
+    <section class="stats-grid">
+      <article class="panel stat"><label>TCP 延迟</label><strong id="tcpLatency">—</strong><small>RTT · 等待采样</small><div class="mini-line"></div></article>
+      <article class="panel stat"><label>UDP 丢包率</label><strong id="udpLoss">—</strong><small>独立 UDP 统计</small><div class="mini-line alt"></div></article>
+      <article class="panel stat"><label>上行速率</label><strong id="uploadRate">—</strong><small>手机 / PC → 对端</small></article>
+      <article class="panel stat"><label>下行速率</label><strong id="downloadRate">—</strong><small>对端 → 手机 / PC</small></article>
+    </section>
+
+    <section class="panel flow-panel">
+      <div class="section-head"><div><div class="eyebrow">LIVE TRANSMISSION</div><h2>实时数据流</h2></div><span class="waiting"><i></i> 尚未接入真实数据</span></div>
+      <div class="flow-legend"><span><i class="dot cyan"></i> TCP 通道</span><span><i class="dot violet"></i> UDP 通道</span><span class="right">动态波形为视觉预览，不代表实际流量</span></div>
+      <canvas id="flowCanvas" height="150"></canvas>
+      <div class="flow-bottom"><span>TCP <b>DISCONNECTED</b></span><span>UDP <b>DISCONNECTED</b></span><span>最后采样 <b id="lastSample">暂无</b></span></div>
+    </section>
+
+    <div class="two-col">
+      <section class="panel model-panel">
+        <div class="section-head"><div><div class="eyebrow">MODEL ORCHESTRATION</div><h2>AI 模型管理</h2></div><span class="tag pale">AUTO ROUTER</span></div>
+        <div class="model-active"><div class="model-icon">✧</div><div class="model-info"><small>当前主模型</small><b id="activeModel">尚未检测</b><span id="modelState">请配置本地模型运行时</span></div><span class="status-pill neutral" id="modelPill">未连接</span></div>
+        <div class="model-row"><span>备用模型</span><b id="fallbackModel">尚未配置</b></div>
+        <div class="model-row"><span>视觉识别能力</span><b id="visionState">待检测</b></div>
+        <div class="model-row"><span>自动故障切换</span><b class="enabled">策略待接入</b></div>
+        <div class="model-actions"><button class="soft" id="probeBtn">检查模型</button><button class="soft" id="modelConfigBtn">模型配置</button></div>
+        <p class="hint">模型进程存在不等于推理可用。上线后将执行真实健康检查与推理探针，备用模型验证成功后才切换。</p>
+      </section>
+
+      <section class="panel device-panel">
+        <div class="section-head"><div><div class="eyebrow">DEVICE LINK</div><h2>设备与网络</h2></div><span class="tag pale">USB / WI-FI</span></div>
+        <div class="device-choice"><button class="choice selected" data-mode="USB">⌁ USB 连接</button><button class="choice" data-mode="Wi-Fi">◉ Wi-Fi 连接</button></div>
+        <div class="device-state"><div class="phone-icon">▯</div><div><b id="deviceName">尚未发现 Android 设备</b><small id="deviceDetail">连接手机后显示设备信息</small></div></div>
+        <div class="model-row"><span>传输协议</span><b id="transportMode">USB / ADB</b></div>
+        <div class="model-row"><span>TCP 状态</span><b class="muted">未连接</b></div>
+        <div class="model-row"><span>UDP 状态</span><b class="muted">未连接</b></div>
+        <p class="hint">Wi-Fi 模式仅用于受信任的本地网络；不会将 ADB 调试端口暴露到公网。</p>
+      </section>
+    </div>
+
+    <section class="panel log-panel">
+      <div class="section-head"><div><div class="eyebrow">SYSTEM EVENTS</div><h2>运行日志</h2></div><button class="text-btn" id="clearLog">清空</button></div>
+      <div id="eventLog" class="event-list"><div class="event"><time>--:--:--</time><span class="event-dot"></span><p>控制中心已启动，等待设备桥接与本地推理服务。</p></div></div>
+    </section>
+    <footer>GAMER · BUILT FOR YOUR NEXT ADVENTURE <span>本地优先 · 用户可控 · 状态透明</span></footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
