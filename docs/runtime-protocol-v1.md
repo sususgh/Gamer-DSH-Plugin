@@ -101,3 +101,36 @@ Android TTS is the playback endpoint. The DSH host may send concise `companion.s
 ## Compatibility and validation
 
 The protocol is game-agnostic, but game support is not automatic. Each game needs a tested perception profile, coordinate mapping, action mapping and closed-loop acceptance report. See Gamer-Mobile `docs/game-compatibility.md`.
+
+
+## Companion session state and autonomy
+
+The companion is one logical session rendered on both Android and Windows. The host is authoritative for goal/task state; the phone reports action execution and renders the compact companion state. Both clients consume the same versioned events so avatar animations and status do not contradict each other.
+
+Recommended event types:
+- `companion.state`: session state (autonomous, task, paused, recovering, disconnected), current goal, task ID, selected world mode, mood/animation key, concise status text, revision and timestamp.
+- `companion.task`: user task accepted, queued, started, progress, completed, blocked or cancelled; include task ID and evidence/result summary.
+- `companion.speech`: concise speech text, voice profile key, priority and interruptibility. The Android app plays speech locally; desktop may show a transcript or optionally play audio.
+- `companion.goal`: autonomous goal selected, rationale summary, success/failure and next goal.
+
+### Default autonomous loop
+
+When a game session is active, no user task is pending, and the user has not paused automation, the coordinator runs an observe → update game state → choose goal → plan → validate → act → verify → replan loop. It must not wait indefinitely for a user prompt. The loop is bounded by safety rules, game profile capabilities, action deadlines and model availability.
+
+### Task priority and completion
+
+A new user task takes priority over conflicting autonomous goals. The coordinator records the task, acknowledges it, tracks progress and verifies completion against subsequent observations/action outcomes. Only after verification should it emit a completed event and a companion success line (for example, “旅行者，我已经完成你吩咐的任务啦！”). If completion cannot be verified, report blocked/uncertain rather than claiming success. When the queue is empty, return to autonomous exploration.
+
+### World mode policy
+
+- Survival mode: prioritize survival, health/food where applicable, hazard avoidance, resource collection, tools, shelter and exploration.
+- Creative mode: prioritize exploration, construction and user-defined design goals.
+- Game-specific profiles define which mechanics exist; do not assume hunger, crafting or building in games that lack them.
+
+### Shared dynamic avatar state
+
+Use a shared state machine for mobile and desktop presentation: idle/listening, thinking, exploring, moving, interacting, task-progress, success, warning, model-switching, paused and disconnected. State transitions must be driven by real session events, not decorative timers. The desktop can show detailed logs; the phone shows compact avatar animation/status and optional speech. The persona is a user-interface character and must not be represented as evidence of model consciousness.
+
+### Fail-safe behavior
+
+User pause/stop overrides all autonomous and queued actions. On disconnect, unavailable compatible models, stale observations or uncertain state, stop issuing new inputs and publish a warning. Preserve the current task and verified progress through failover. Require explicit approval for purchases, spending premium currency, deleting saves or other irreversible/account-sensitive actions.
