@@ -9,3 +9,7 @@ $('modelConfigBtn').addEventListener('click',()=>{const primary=prompt('主模�
 $('clearLog').addEventListener('click',()=>{$('eventLog').replaceChildren();log('日志已清空。');});
 const canvas=$('flowCanvas'),ctx=canvas.getContext('2d');let phase=0;
 function draw(){const dpr=Math.max(1,window.devicePixelRatio||1),w=canvas.clientWidth,h=150;if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);for(let j=0;j<2;j++){ctx.beginPath();for(let x=0;x<=w;x+=3){const y=h/2+Math.sin(x*.023+phase+j*1.5)*(15+j*8)+Math.sin(x*.009-phase*.7)*(7+j*4);if(x===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.strokeStyle=j===0?'rgba(91,190,199,.72)':'rgba(160,145,211,.58)';ctx.lineWidth=j===0?2:1.6;ctx.stroke();}phase+=.025;requestAnimationFrame(draw);}draw();window.addEventListener('resize',()=>{canvas.width=0;});
+
+/* Model selection UI is intentionally empty until the real local-model registry reports installed models. */
+$('selectAllModels')?.addEventListener('click',()=>{log('模型列表尚未从本地运行时加载，暂时没有可选择的模型。');});
+$('pairRefresh')?.addEventListener('click',()=>{log('安全配对服务尚未启动，当前不能生成真实二维码。');});
