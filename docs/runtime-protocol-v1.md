@@ -134,3 +134,13 @@ Use a shared state machine for mobile and desktop presentation: idle/listening, 
 ### Fail-safe behavior
 
 User pause/stop overrides all autonomous and queued actions. On disconnect, unavailable compatible models, stale observations or uncertain state, stop issuing new inputs and publish a warning. Preserve the current task and verified progress through failover. Require explicit approval for purchases, spending premium currency, deleting saves or other irreversible/account-sensitive actions.
+
+
+## QR pairing success companion event
+
+After (and only after) the one-time QR pairing token is validated, the host is authenticated, and the session handshake succeeds, emit `companion.pairing` with `status: "paired_ready"`, session ID, timestamp and negotiated capabilities. Both mobile and desktop clients transition to the paired-ready avatar state and synchronize the happy floating/waving animation and subtitle.
+
+The mobile client may speak this welcome line through the selected/licensed voice profile:
+“恭喜旅行者，匹配成功！接下来就由派蒙代替你玩游戏吧！放心交给我，我会努力探索世界、完成任务的！”
+
+QR decode alone is not pairing success. Expired/invalid tokens, rejected consent, failed authentication or unreachable hosts must produce an explicit error/retry state and must not announce success. Autonomous gameplay starts only after the user has enabled it, granted required capture/input permissions, selected a compatible game profile, and all required session/model health checks pass.
