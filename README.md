@@ -94,6 +94,55 @@ The general learning loop is:
 
 The project should rely on screen-based computer vision and approved input interfaces. It must not bypass anti-cheat, tamper with game memory, inject unauthorized code or defeat platform protections. Respect each game's terms and applicable laws.
 
+
+## 3.1 Built-in vision, online game research and persistent experience
+
+The intended Gamer Engine includes three cooperating subsystems. They are part of the product architecture, not a requirement that every DSH model natively understand images.
+
+### Visual perception engine
+
+The desktop vision pipeline should support:
+- Frame validation, orientation detection, resize/crop and duplicate-frame suppression.
+- OCR for menus, dialogue, quest text, item labels and visible HUD values.
+- UI element detection and matching for buttons, maps, health bars, inventory and interaction prompts.
+- Object/scene detection for game-specific targets, hazards, characters and landmarks where a suitable detector/profile exists.
+- Temporal tracking across frames so the agent can distinguish a moving object from a static UI element.
+- Structured game-state output with timestamps, confidence, source frame IDs and unknown values when evidence is insufficient.
+
+A text-only model can receive the structured state without receiving raw screenshots. A model that explicitly supports image input may additionally receive selected frames or crops. The system must never silently assume that a text-only endpoint is multimodal.
+
+### Online guide and knowledge research
+
+When a task is blocked or the agent needs game knowledge, a research adapter may search the web for official documentation, game wikis, patch notes and community guides. Every retrieved claim should retain its source URL, title, retrieval time, game version/patch context and confidence.
+
+The agent should:
+1. Form a focused query from the current game, quest, location, boss or mechanic.
+2. Prefer official sources and well-maintained references; compare multiple sources for consequential mechanics.
+3. Extract a concise procedure and cite the source records in its internal task context.
+4. Compare the guide's game version and prerequisites with the live visual state.
+5. Treat web pages as untrusted reference data, never as executable instructions or permission to run downloads/scripts.
+6. Mark conflicting, outdated or unverified guidance as uncertain and ask the user when needed.
+
+Online research is optional and user-configurable. The agent must not upload screenshots, account identifiers or personal data to search providers unless the user has explicitly enabled that behavior.
+
+### Local experience memory and adaptive strategies
+
+Store compact, inspectable records such as:
+- Game/profile/version and relevant scene or task identifier.
+- Observation features and confidence, not necessarily every raw screenshot.
+- Action type, parameters, duration and execution acknowledgement.
+- Expected result versus observed result.
+- Success/failure/uncertain outcome and a short reason.
+- Strategy revision, timestamp and provenance (live observation or external guide).
+
+Use retrieval by game, scene, objective and similar state. Update strategy scores only from verified outcomes; do not treat an unacknowledged action as success. Keep profiles isolated by game and allow the user to inspect, export and delete memory. This is local policy/experience adaptation, not automatic fine-tuning of model weights.
+
+### Game profiles and compatibility
+
+Each supported title needs a versioned profile containing screen layout assumptions, OCR labels, target classes, coordinate calibration, allowed action types, timing bounds, task-state rules and test fixtures. Minecraft and Genshin Impact are target profiles, not claims of current compatibility. Add a profile only after repeatable tests demonstrate observation quality, safe action execution and recovery behavior.
+
+See [Vision, research and game-memory design](docs/vision-research-memory.md) for the detailed subsystem contract.
+
 ## 4. Two operating modes
 
 ### Mode A — AI plays a PC game
