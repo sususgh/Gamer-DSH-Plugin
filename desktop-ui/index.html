@@ -50,6 +50,26 @@
       <div class="flow-bottom"><span>TCP <b>DISCONNECTED</b></span><span>UDP <b>DISCONNECTED</b></span><span>最后采样 <b id="lastSample">暂无</b></span></div>
     </section>
 
+
+    <section class="panel intelligence-panel">
+      <div class="section-head"><div><div class="eyebrow">PERCEPTION · RESEARCH · MEMORY</div><h2>游戏智能核心</h2></div><span class="tag pale">LOCAL-FIRST AI</span></div>
+      <div class="intelligence-grid">
+        <article class="intel-card"><div class="intel-icon">◉</div><div class="intel-title">视觉识别引擎</div><p>画面采集 → 场景识别 → OCR → 目标检测 → 游戏状态结构化</p><div class="intel-status"><i></i><b id="visionEngineState">等待视觉运行时</b></div><div class="intel-meta">帧时间戳 · 识别置信度 · 画面新鲜度</div><button class="soft" id="visionTestBtn">视觉模块自检</button></article>
+        <article class="intel-card"><div class="intel-icon">⌕</div><div class="intel-title">联网攻略研究</div><p>按游戏、任务、区域或 BOSS 搜索资料，提取步骤并核对当前版本。</p><div class="intel-status"><i></i><b id="researchState">等待搜索服务</b></div><div class="intel-meta">来源链接 · 更新时间 · 可信度 · 版本匹配</div><button class="soft" id="researchBtn">检查攻略检索</button></article>
+        <article class="intel-card"><div class="intel-icon">⌘</div><div class="intel-title">游戏经验记忆</div><p>记录动作、结果、失败原因和有效策略；按游戏配置隔离保存。</p><div class="intel-status"><i></i><b id="memoryState">等待本地记忆库</b></div><div class="intel-meta">成功率 · 最近经验 · 可查看与清除</div><button class="soft" id="memoryBtn">检查经验记忆</button></article>
+      </div>
+      <p class="hint">当前为控制台功能入口与状态展示。视觉推理、联网检索和持久化记忆须由真实运行时接入后才会启用；未接入时不会伪造识别结果或攻略结论。</p>
+    </section>
+    <section class="panel game-profile-panel">
+      <div class="section-head"><div><div class="eyebrow">GAME ADAPTERS</div><h2>游戏配置与兼容性</h2></div><span class="tag pale">PROFILE-BASED</span></div>
+      <div class="profile-grid">
+        <div class="profile-item"><div><b>Minecraft</b><small>目标适配 · 生存 / 创造 / 建造</small></div><span class="status-pill neutral">待测试</span></div>
+        <div class="profile-item"><div><b>原神</b><small>目标适配 · 探索 / 任务 / 战斗</small></div><span class="status-pill neutral">待测试</span></div>
+        <div class="profile-item"><div><b>其他游戏</b><small>通过独立视觉与控制配置扩展</small></div><span class="status-pill neutral">可扩展</span></div>
+      </div>
+      <div class="profile-note">每款游戏需要独立的 UI 识别规则、坐标校准、动作映射、任务状态和回归测试。游戏名称出现在列表中不代表已经兼容。</div>
+    </section>
+
     <div class="two-col">
       <section class="panel model-panel">
         <div class="section-head"><div><div class="eyebrow">MODEL ORCHESTRATION</div><h2>AI 模型管理</h2></div><span class="tag pale">AUTO ROUTER</span></div>
