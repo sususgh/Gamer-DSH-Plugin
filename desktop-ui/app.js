@@ -18,3 +18,36 @@ $('pairRefresh')?.addEventListener('click',()=>{log('安全配对服务尚未启
 $('visionTestBtn')?.addEventListener('click',()=>{log('视觉自检请求已记录；当前仓库尚未接入帧采集、OCR 或目标检测运行时。');$('visionEngineState').textContent='运行时未接入';});
 $('researchBtn')?.addEventListener('click',()=>{log('攻略检索检查请求已记录；联网搜索适配器尚未接入，当前不会生成未经来源核验的攻略。');$('researchState').textContent='搜索适配器未接入';});
 $('memoryBtn')?.addEventListener('click',()=>{log('经验记忆检查请求已记录；本地存储、检索与用户清除接口尚未接入。');$('memoryState').textContent='记忆库未接入';});
+
+
+/* Optional community TTS bridge. The model weights stay outside this repository. */
+const ttsEndpoint=$('ttsEndpoint');
+const ttsAudio=$('ttsAudio');
+const savedTtsEndpoint=localStorage.getItem('gamer.tts.endpoint');
+if(savedTtsEndpoint&&ttsEndpoint)ttsEndpoint.value=savedTtsEndpoint;
+const getTtsBase=()=>{const raw=(ttsEndpoint?.value||'').trim().replace(/\/+$/,'');if(!raw)throw new Error('请填写 TTS 服务地址');const u=new URL(raw);if(!['http:','https:'].includes(u.protocol))throw new Error('只支持 HTTP(S) 地址');return raw;};
+$('ttsHealthBtn')?.addEventListener('click',async()=>{
+  try{
+    const base=getTtsBase();localStorage.setItem('gamer.tts.endpoint',base);
+    $('ttsState').textContent='正在检测…';
+    const response=await fetch(base+'/health',{method:'GET'});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    const data=await response.json();
+    if(data.status!=='ok'||data.loaded!==true)throw new Error('服务在线，但音色模型尚未加载');
+    $('ttsState').textContent='已连接 · '+(data.model||'TTS 模型')+' · '+(data.device||'device');
+    log('派蒙 TTS 服务健康检查通过。');
+  }catch(e){$('ttsState').textContent='连接失败：'+e.message;log('派蒙 TTS 检查失败：'+e.message);}
+});
+$('ttsPreviewBtn')?.addEventListener('click',async()=>{
+  try{
+    const base=getTtsBase();localStorage.setItem('gamer.tts.endpoint',base);
+    const text=($('ttsText')?.value||'').trim();if(!text)throw new Error('请输入试听文本');
+    $('ttsState').textContent='正在合成语音…';
+    const response=await fetch(base+'/tts_to_audio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,length_scale:1.0})});
+    if(!response.ok){let detail='HTTP '+response.status;try{const data=await response.json();detail=data.error?.message||detail;}catch{}throw new Error(detail);}
+    const blob=await response.blob();if(!blob.type.includes('audio'))throw new Error('服务返回的不是音频文件');
+    if(ttsAudio.dataset.objectUrl)URL.revokeObjectURL(ttsAudio.dataset.objectUrl);
+    const objectUrl=URL.createObjectURL(blob);ttsAudio.dataset.objectUrl=objectUrl;ttsAudio.src=objectUrl;
+    await ttsAudio.play();$('ttsState').textContent='语音合成成功 · 正在播放';log('派蒙 TTS 试听合成成功。');
+  }catch(e){$('ttsState').textContent='试听失败：'+e.message;log('派蒙 TTS 试听失败：'+e.message);}
+});
