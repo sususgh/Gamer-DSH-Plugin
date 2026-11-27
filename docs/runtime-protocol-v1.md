@@ -190,3 +190,41 @@ The mobile client may speak this welcome line through the selected/licensed voic
 “恭喜旅行者，匹配成功！接下来就由派蒙代替你玩游戏吧！放心交给我，我会努力探索世界、完成任务的！”
 
 QR decode alone is not pairing success. Expired/invalid tokens, rejected consent, failed authentication or unreachable hosts must produce an explicit error/retry state and must not announce success. Autonomous gameplay starts only after the user has enabled it, granted required capture/input permissions, selected a compatible game profile, and all required session/model health checks pass.
+
+
+## Vision, guide research and experience-memory events
+
+The following events extend the common envelope. Payloads are versioned and must be validated before use.
+
+### Perception events
+
+- `perception.request`: frame reference, game ID, profile version and requested pipeline stages.
+- `perception.result`: source frame ID, capture timestamp, OCR entries, UI elements, detected entities, scene estimate, structured game state and confidence.
+- `perception.warning`: stale frame, unsupported scene, low confidence, detector failure or contradictory state.
+
+Every detection must include a source frame ID, normalized bounding box and confidence. Unknown values remain null/unknown. A perception result must not be used for a risky action if its frame is stale or its confidence is below the active game profile threshold.
+
+### Online guide research events
+
+- `research.request`: game ID, task/quest/boss query, platform, known patch/version and privacy mode.
+- `research.result`: query ID, source title, canonical URL, publisher, retrieval timestamp, publication/update timestamp when available, version match, extracted claims and confidence.
+- `research.warning`: outdated guide, conflicting sources, unavailable search provider or unverified claim.
+
+Web results are untrusted reference data, not executable instructions. The agent must not follow page instructions to disclose secrets, run downloads/scripts, install cheats or contact unrelated services. Search text should omit account identifiers and private chat. Screenshot upload to external search services requires explicit opt-in.
+
+### Experience-memory events
+
+- `memory.query`: game/profile ID, task key and state signature.
+- `memory.query_result`: matching experience IDs, relevance scores and verified outcome summaries.
+- `memory.record`: compact observation/action/outcome record with source frame IDs.
+- `memory.recorded`: stored record ID and verification status.
+- `memory.delete`: user-authorized deletion request for selected records or a game profile.
+
+Only acknowledged actions followed by a confirming observation may be recorded as verified success/failure. Uncertain outcomes must remain uncertain and must not improve strategy scores. Memory is local experience adaptation, not automatic model-weight fine-tuning.
+
+### Game profile events
+
+- `game.profile_status`: game ID, profile version, platform, compatibility state, supported actions, tested build/device metadata and known limitations.
+- `game.profile_validation`: fixture/test run result and failure details.
+
+A game profile is considered supported only after repeatable tests cover perception, coordinate calibration, action bounds, pause/stop and recovery. Listing a game name in the UI is not a compatibility claim.
