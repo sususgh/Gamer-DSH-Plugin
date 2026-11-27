@@ -13,6 +13,18 @@ function draw(){const dpr=Math.max(1,window.devicePixelRatio||1),w=canvas.client
 /* Model selection UI is intentionally empty until the real local-model registry reports installed models. */
 $('selectAllModels')?.addEventListener('click',()=>{log('模型列表尚未从本地运行时加载，暂时没有可选择的模型。');});
 $('pairRefresh')?.addEventListener('click',()=>{log('安全配对服务尚未启动，当前不能生成真实二维码。');});
+$('pairPinSubmit')?.addEventListener('click',()=>{
+  const pin=($('pairPin')?.value||'').trim();
+  if(!/^\\d{6}$/.test(pin)){
+    $('pairState').textContent='PIN 格式错误 · 请输入 6 位数字';
+    log('PIN 输入未通过格式校验。');
+    $('pairPin')?.focus();
+    return;
+  }
+  $('pairState').textContent='PIN 格式正确 · 等待配对认证服务';
+  log('已录入 6 位 PIN；当前版本尚未接入跨设备认证服务，因此未建立连接。');
+});
+$('pairPin')?.addEventListener('input',event=>{event.target.value=event.target.value.replace(/\\D/g,'').slice(0,6);});
 
 
 $('visionTestBtn')?.addEventListener('click',()=>{log('视觉自检请求已记录；当前仓库尚未接入帧采集、OCR 或目标检测运行时。');$('visionEngineState').textContent='运行时未接入';});

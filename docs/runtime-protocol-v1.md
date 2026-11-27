@@ -264,3 +264,16 @@ On a game change, cancel actions from the previous profile before loading anothe
 ### Safety precedence
 
 Priority order: emergency stop/pause > safety warning > direct user voice command > task progress > idle chatter/song. A new command interrupts low-priority speech. A disconnect, stale observation, uncertain game identity, failed model or profile mismatch blocks new autonomous actions. The Android client must have a local stop path independent of desktop connectivity.
+
+
+## DSH-plugin-generated PIN pairing (addition)
+
+The DSH plugin is the PIN issuer; the Windows desktop host is the PIN entry/verification side. Keep QR pairing available as an alternative.
+
+1. The plugin generates a cryptographically random six-digit decimal PIN using the platform CSPRNG.
+2. The PIN expires after 120 seconds and is intended for one successful use only. The plugin UI may regenerate it; regeneration invalidates the previous PIN.
+3. The Windows desktop UI accepts exactly six digits and sends the PIN to the pairing host over the authenticated pairing channel.
+4. The host verifies expiry, one-time consumption, attempt limits and desktop/device identity. After success it consumes the PIN and performs the authenticated session handshake.
+5. The PIN must never be used as a session key, API key or long-lived credential. Exchange a high-entropy short-lived session credential after verification.
+
+Security requirements: rate-limit failed attempts (for example, five attempts per PIN window), compare PINs without leaking timing information where practical, invalidate on expiry/disconnect/regeneration, and never log the PIN. A UI-only PIN generator/input is not a completed cross-device pairing implementation; the host-side rendezvous endpoint and handshake must exist before either side may display paired/connected.

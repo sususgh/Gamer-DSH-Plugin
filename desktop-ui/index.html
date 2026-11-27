@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#eaf3f8">
   <title>Gamer · 派蒙星光控制中心</title>
   <link rel="stylesheet" href="style.css">
+  <style>.pin-entry{display:flex;gap:8px;align-items:center;margin:8px 0 12px}.pin-entry input{min-width:0;flex:1;padding:11px 12px;border:1px solid rgba(127,127,127,.3);border-radius:9px;background:rgba(255,255,255,.72);font:600 18px/1.2 ui-monospace,monospace;letter-spacing:4px}.pin-entry button{white-space:nowrap}@media(max-width:480px){.pin-entry{align-items:stretch;flex-direction:column}}</style>
 </head>
 <body>
   <div class="sky-glow"></div>
@@ -30,10 +31,13 @@
     <section class="panel pairing-panel">
       <div class="section-head"><div><div class="eyebrow">CROSS-DEVICE PAIRING</div><h2>手机 · 电脑 · AI 模型配对</h2></div><span class="tag pale">ONE ACCOUNT · TWO SCREENS</span></div>
       <div class="pairing-layout">
-        <div class="qr-placeholder" aria-label="真实配对二维码待后端服务生成"><div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-center">✦<small>PAIR</small></div><div class="qr-corner bl"></div><div class="qr-corner br"></div></div>
-        <div class="pairing-copy"><h3>用手机版扫描二维码</h3><p>扫码后将手机与这台电脑安全配对。模型继续在电脑本地运行，手机负责画面采集与触控执行。</p><div class="pairing-meta"><span>配对状态</span><b id="pairState">等待配对服务</b></div><div class="pairing-meta"><span>连接方式</span><b>局域网 Wi-Fi / USB</b></div><button class="soft" id="pairRefresh" disabled>等待安全配对服务接入</button></div>
+        <div class="qr-placeholder" aria-label="二维码配对入口保留，等待配对服务生成"><div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-center">✦<small>QR</small></div><div class="qr-corner bl"></div><div class="qr-corner br"></div></div>
+        <div class="pairing-copy"><h3>二维码扫描或 PIN 配对</h3><p>DSH 插件端自动生成 6 位 PIN 后，在下方输入；也可以继续使用手机版扫描二维码。</p>
+          <label for="pairPin">DSH 插件生成的 6 位 PIN</label>
+          <div class="pin-entry"><input id="pairPin" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="输入 6 位 PIN" aria-label="DSH 插件生成的 6 位 PIN"><button class="primary" id="pairPinSubmit">验证 PIN</button></div>
+          <div class="pairing-meta"><span>配对状态</span><b id="pairState">等待输入 PIN 或扫码</b></div><div class="pairing-meta"><span>连接方式</span><b>局域网 Wi-Fi / USB</b></div><button class="soft" id="pairRefresh" disabled>等待二维码配对服务接入</button></div>
       </div>
-      <p class="hint">当前二维码区域为占位框，不是可扫描二维码。正式配对将使用短时有效的一次性令牌，不在二维码中放置模型密钥。</p>
+      <p class="hint">PIN 由 DSH 插件端生成，有效期 2 分钟且设计为一次性使用。当前桌面端已加入 PIN 输入与格式校验界面；真正的跨设备 PIN 校验、令牌消费和加密握手仍需配对服务接入。二维码入口继续保留。</p>
     </section>
 
     <section class="stats-grid">
