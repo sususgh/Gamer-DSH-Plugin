@@ -228,3 +228,39 @@ Only acknowledged actions followed by a confirming observation may be recorded a
 - `game.profile_validation`: fixture/test run result and failure details.
 
 A game profile is considered supported only after repeatable tests cover perception, coordinate calibration, action bounds, pause/stop and recovery. Listing a game name in the UI is not a compatibility claim.
+
+
+## Voice companion, greeting and autonomous idle behavior
+
+### Voice and speech events
+
+- `voice.permission_status`: microphone permission, listening mode (push-to-talk or explicitly enabled wake word) and visible listening state.
+- `voice.transcript`: transcript, language, confidence, capture timestamp and optional command correlation ID. Do not include raw audio unless the user separately enabled audio transport.
+- `voice.intent`: normalized intent, game/profile ID, confidence and requested action scope.
+- `voice.command_result`: accepted/clarification_required/rejected, concise reason and task ID.
+- `voice.speak.request`: text, voice profile, priority, playback target and session ID.
+- `voice.speak.started/completed/failed/cancelled`: request ID and playback result.
+- `companion.greeting`: successful authenticated session ID and greeting key. Emit once per ready session; do not replay on heartbeat.
+
+Android should default to push-to-talk. Wake-word listening requires explicit opt-in and a persistent indicator. A local stop/pause command must cancel speech and queued actions without waiting for a model response.
+
+### Idle companion and bounded autonomy
+
+- `companion.mode_set`: wait_and_chat or autonomous_roam, user consent timestamp and policy revision.
+- `companion.idle_event`: observation-grounded conversational prompt/event, rate-limit metadata and priority.
+- `companion.autonomy_status`: enabled/disabled/paused, current goal, exploration boundary and reason.
+- `companion.policy_update`: allowed activities, radius, protected areas, resource limits, danger thresholds and quiet hours.
+
+Autonomous roaming is disabled by default. It may only run under a user-approved policy and a validated game profile. Speech is lower priority than voice commands and safety warnings. No autonomous PvP, griefing, purchases, premium-currency spending or irreversible account actions.
+
+### Game recognition and profile switching
+
+- `game.detected`: candidate game ID/title, platform, evidence sources and confidence.
+- `game.profile_switch_request`: old profile, candidate profile and reason.
+- `game.profile_switch_result`: accepted/rejected, validated profile version and compatibility state.
+
+On a game change, cancel actions from the previous profile before loading another. Require multiple evidence signals where available (foreground package, OCR/UI fingerprint and scene cues). Unknown or low-confidence games enter observe-only mode; never guess action mappings. Profiles are game-specific.
+
+### Safety precedence
+
+Priority order: emergency stop/pause > safety warning > direct user voice command > task progress > idle chatter/song. A new command interrupts low-priority speech. A disconnect, stale observation, uncertain game identity, failed model or profile mismatch blocks new autonomous actions. The Android client must have a local stop path independent of desktop connectivity.
