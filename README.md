@@ -37,7 +37,64 @@ Gamer is designed to let an AI agent play supported games through a closed feedb
 
 The system is intended for both PC games and Android mobile games. The location where the game runs is separate from the location where the main AI processing runs.
 
-## 2. Two operating modes
+## 2. End-to-end user workflow: desktop QR → Android → start playing
+
+The intended product has two clients with different responsibilities:
+
+- **Windows/desktop application:** the control center. It owns the DSH integration, configured model/API profile, primary processing pipeline, game-agent coordinator and device session.
+- **Android application:** the mobile companion and game terminal. It scans the desktop's pairing QR code, obtains explicit user confirmation, runs the mobile game, captures observations and executes approved touch actions.
+
+### Pairing and start sequence
+
+1. The desktop user opens **Connect Android**. The desktop generates a short-lived, single-use QR pairing code containing a pairing token and the host connection information. It must not contain a permanent model API key.
+2. The Android user opens Gamer-Mobile and scans the QR code.
+3. Android displays the desktop identity and requested permissions. The user explicitly taps **Confirm connection**.
+4. The desktop validates the one-time token and authenticates the phone. Both clients complete a session handshake and show **Paired / Connected** only after authentication succeeds.
+5. The desktop reads the active DSH model/API configuration through its local integration. It resolves the configured provider, API base URL, model identifier and supported capabilities. The phone does not need to know or store the model API key.
+6. Android displays the available connection and model/session status. The user opens a supported game and taps **Start** on the phone.
+7. Android sends a start-session command to the desktop. The desktop checks pairing, permissions, model health, game profile and safety conditions before accepting the session.
+8. The desktop begins the observe → vision → model reasoning → action planning → validation loop. It sends approved touch actions to Android, receives acknowledgements and new frames, and continues while the session is active.
+9. The user can pause or stop from either client. A stop command takes priority over autonomous goals and queued actions.
+
+**QR scanning is not the same as pairing success.** A decoded QR must still be confirmed, authenticated and exchanged for a session credential. If confirmation is declined, the token expires, authentication fails or the host is unreachable, the clients must show an error/retry state and must not report a successful connection.
+
+### Automatic API/provider recognition
+
+Gamer should use the **active model configuration already selected in DSH**, rather than requiring users to enter a second API key in the Android app.
+
+The desktop integration should resolve:
+- Provider identifier (for example, DeepSeek or another configured provider)
+- API base URL / endpoint
+- Model identifier
+- Authentication secret reference (kept local on desktop)
+- Declared capabilities such as vision, reasoning and structured output
+- Timeout, context and request settings supported by that provider
+
+The adapter routes requests to the currently selected, healthy provider. If the user changes the active DSH model, the desktop should refresh the model configuration at a safe session boundary, verify the new endpoint with a probe, and then use it. If the selected model is unavailable or lacks a required capability, pause and explain the issue or use an explicitly configured compatible fallback. Never guess a provider from an API key string, expose credentials to the phone, or silently send requests to an unrelated endpoint.
+
+A text-only DeepSeek/model endpoint cannot interpret raw screenshots by itself. For pure-computer-vision gameplay, the desktop can run local visual perception (image processing, OCR, UI/object detection and game-state extraction) and send structured observations to a text reasoning model. If the chosen model itself supports image input, the adapter may send selected frames/crops as well. The architecture must support both paths and declare which one is active.
+
+## 3. Game-agnostic visual learning and gameplay
+
+The intended agent is not limited to one hard-coded game. It should use general computer-vision and AI techniques to observe a game, infer its current state, learn controls and mechanics through permitted interaction, and improve its policy from observed outcomes.
+
+The general learning loop is:
+
+1. Detect the game window/screen, UI elements, scene changes and relevant objects.
+2. Estimate state such as player position, health, inventory, objectives, menus, hazards and available controls when visually observable.
+3. Identify the current game/profile and map screen coordinates to normalized actions.
+4. Form a small hypothesis or goal, choose a low-risk action and execute it.
+5. Compare the next observation with the predicted result.
+6. Record successful/failed action outcomes and update the game-specific state/profile.
+7. Repeat, progressively learning navigation, interaction patterns and task sequences.
+
+**Minecraft, Genshin Impact and other games are target examples, not a guarantee of universal compatibility on day one.** Each game has different camera controls, UI, combat timing, menus, permissions and input mappings. A game profile and validation/testing are required for reliable support. For example, Minecraft may require movement, camera, inventory, block interaction and survival-state perception; Genshin Impact may require camera, movement, menus, combat and interaction recognition. The system should not assume the same actions or mechanics exist in every title.
+
+“Learning” here means measurable software adaptation: building visual/game state, remembering action outcomes, updating game profiles and improving strategies. It does not imply that the model permanently trains its neural-network weights during play. Persistent learning data should be stored locally and be inspectable/resettable by the user.
+
+The project should rely on screen-based computer vision and approved input interfaces. It must not bypass anti-cheat, tamper with game memory, inject unauthorized code or defeat platform protections. Respect each game's terms and applicable laws.
+
+## 4. Two operating modes
 
 ### Mode A — AI plays a PC game
 
