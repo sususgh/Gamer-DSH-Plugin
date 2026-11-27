@@ -13,3 +13,8 @@ function draw(){const dpr=Math.max(1,window.devicePixelRatio||1),w=canvas.client
 /* Model selection UI is intentionally empty until the real local-model registry reports installed models. */
 $('selectAllModels')?.addEventListener('click',()=>{log('模型列表尚未从本地运行时加载，暂时没有可选择的模型。');});
 $('pairRefresh')?.addEventListener('click',()=>{log('安全配对服务尚未启动，当前不能生成真实二维码。');});
+
+
+$('visionTestBtn')?.addEventListener('click',()=>{log('视觉自检请求已记录；当前仓库尚未接入帧采集、OCR 或目标检测运行时。');$('visionEngineState').textContent='运行时未接入';});
+$('researchBtn')?.addEventListener('click',()=>{log('攻略检索检查请求已记录；联网搜索适配器尚未接入，当前不会生成未经来源核验的攻略。');$('researchState').textContent='搜索适配器未接入';});
+$('memoryBtn')?.addEventListener('click',()=>{log('经验记忆检查请求已记录；本地存储、检索与用户清除接口尚未接入。');$('memoryState').textContent='记忆库未接入';});
