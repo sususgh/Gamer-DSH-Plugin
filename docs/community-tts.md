@@ -61,3 +61,12 @@ When the dashboard is served over HTTPS, browsers may block requests to an insec
 ## Current implementation status
 
 The dashboard currently contains an optional endpoint field, health-check button and WAV preview request for the documented ai-paimon API shape. The complete desktop agent-to-TTS event bridge and Android playback routing are future runtime work. The voice checkpoint itself is not included in this repository.
+
+
+## Companion playback policy
+
+The Paimon voice adapter is also used for the authenticated connection greeting and optional in-game companion chatter. The Android client should play the greeting once after pairing reaches `paired_ready`, using a `companion.greeting` event and a `voice.speak.request`; reconnect heartbeats must not repeat it. The Android app may play the audio locally or receive a protected audio stream from the desktop runtime.
+
+For idle behavior, use rate-limited short lines grounded in current game observations. A user voice command interrupts chatter. Safety warnings and stop acknowledgements outrank ordinary dialogue. Optional singing must use original generated melodies/lyrics, public-domain works or audio with appropriate permission; do not synthesize or distribute copyrighted game songs or commercial recordings without rights.
+
+The companion's speech output does not itself implement speech recognition. Microphone capture, speech-to-text, command confidence, authenticated transcript transport and local emergency stop are separate runtime modules. They are not yet implemented by the current dashboard TTS preview.
