@@ -70,6 +70,27 @@
       <div class="profile-note">每款游戏需要独立的 UI 识别规则、坐标校准、动作映射、任务状态和回归测试。游戏名称出现在列表中不代表已经兼容。</div>
     </section>
 
+
+    <section class="panel voice-panel">
+      <div class="section-head"><div><div class="eyebrow">OPTIONAL COMMUNITY TTS</div><h2>派蒙语音助手</h2></div><span class="tag pale">USER-OPT-IN</span></div>
+      <div class="voice-layout">
+        <div class="voice-avatar">✧</div>
+        <div class="voice-settings">
+          <div class="voice-title">社区训练的派蒙音色（可选）</div>
+          <p>可连接网友制作的 Paimon VITS / TTS 服务，让 AI 游戏助手用语音播报任务、攻略摘要、战斗提醒和操作结果。</p>
+          <label for="ttsEndpoint">本地 TTS 服务地址</label>
+          <input id="ttsEndpoint" type="url" placeholder="http://127.0.0.1:8020" value="http://127.0.0.1:8020">
+          <label for="ttsText">试听文本</label>
+          <input id="ttsText" type="text" maxlength="240" value="旅行者，前面好像有新的任务！">
+          <div class="voice-actions"><button class="soft" id="ttsHealthBtn">检测语音服务</button><button class="primary" id="ttsPreviewBtn">试听派蒙语音</button></div>
+          <div class="intel-status"><i></i><b id="ttsState">尚未连接语音服务</b></div>
+          <audio id="ttsAudio" controls preload="none"></audio>
+        </div>
+      </div>
+      <p class="hint">此处只接入可选 TTS 服务，不在 Gamer 仓库内分发第三方音色权重。社区模型的授权、用途限制和来源请以原作者说明为准；已知示例模型仅允许个人非商业用途。请将服务限制在本机或可信局域网，不要公开暴露。</p>
+      <p class="voice-source">参考社区项目：<a href="https://github.com/gaaiyun/ai-paimon" target="_blank" rel="noopener noreferrer">gaaiyun/ai-paimon</a> · TTS 引擎：<a href="https://github.com/RVC-Boss/GPT-SoVITS" target="_blank" rel="noopener noreferrer">GPT-SoVITS</a></p>
+    </section>
+
     <div class="two-col">
       <section class="panel model-panel">
         <div class="section-head"><div><div class="eyebrow">MODEL ORCHESTRATION</div><h2>AI 模型管理</h2></div><span class="tag pale">AUTO ROUTER</span></div>
