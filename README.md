@@ -378,6 +378,15 @@ Optional voice playback should use a user-selected installed voice or a properly
 
 The companion is a user-interface character and does not imply that the model is conscious.
 
+
+### Optional community Paimon voice pack
+
+Gamer can optionally connect to a separately installed community TTS service so the companion can speak task updates, guide summaries, warnings and verified action results. The desktop dashboard includes a TTS endpoint health check and a short audio preview.
+
+A community project worth evaluating is [gaaiyun/ai-paimon](https://github.com/gaaiyun/ai-paimon), which documents a local Paimon VITS server with `GET /health` and `POST /tts_to_audio` endpoints. Its repository states that its Paimon voice checkpoint is for personal, non-commercial use only. Gamer does not bundle or redistribute that checkpoint; users must obtain model files from the original project and follow its current terms. The upstream project also contains game-derived Live2D assets, which are not part of Gamer's distribution.
+
+The integration is optional and endpoint-based. The voice service should remain on localhost or a trusted LAN, and must not be exposed publicly without authentication and transport protection. TTS is playback only; it does not change model-provider credentials or game-control permissions. See [Community TTS integration](docs/community-tts.md).
+
 ## 12. Safety, privacy and user control
 
 - Keep screenshots, game state and device data on the user's computer by default.
