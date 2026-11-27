@@ -519,3 +519,26 @@ Any state may transition to `paused`, `stopping` or `error`. A new voice command
 - Spoken commentary is based on current observations; songs are original/licensed/public-domain only.
 
 See [runtime protocol](runtime-protocol-v1.md) for the corresponding event contract.
+
+
+---
+
+## Native DSH plugin installation
+
+The repository now includes a native DSH bundle package manifest and plugin entry point. The npm package is published separately from the GitHub source release.
+
+**Desktop DSH installation (after the npm package is published):**
+1. Open **Plugins** in the DSH sidebar.
+2. Select **Add plugin**.
+3. Enter `@sususgh/gamer-dsh-plugin` (the npm package name, not this GitHub URL).
+4. Install and restart DSH.
+5. Open the Gamer plugin page. In a new conversation, ask the model to call `gamer_project_status` to verify that the plugin loaded.
+
+For CLI-managed profiles, use:
+```bash
+npx -y @deepseek-ai/dsh plugin --profile web add @sususgh/gamer-dsh-plugin@1.0.0
+```
+
+See [DSH installation instructions](docs/DSH-INSTALL.zh-CN.md).
+
+**Important implementation status:** the native DSH package currently provides the plugin bundle, a status tool and a status card. The Windows game-control runtime, Android APK/companion bridge, QR pairing, live visual perception and autonomous game actions are not implemented yet. Installing the DSH bundle does not enable game control.
