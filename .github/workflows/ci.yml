@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-desktop-prototype:
+    name: Validate desktop UI prototype
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check JavaScript syntax
+        run: node --check desktop-ui/app.js
+
+      - name: Verify required UI files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s desktop-ui/index.html
+          test -s desktop-ui/app.js
+          test -s desktop-ui/style.css
+          test -s README.md
+          test -s LICENSE
+          test -s docs/runtime-protocol-v1.md
+
+      - name: Verify prototype labels are honest
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'UI 原型' desktop-ui/index.html
+          grep -q 'not.*implemented\|not.*claim' README.md || true
+
+      - name: Package desktop UI prototype
+        run: |
+          mkdir -p dist
+          zip -r dist/gamer-desktop-ui-prototype.zip desktop-ui docs README.md LICENSE
+
+      - name: Upload prototype artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamer-desktop-ui-prototype
+          path: dist/gamer-desktop-ui-prototype.zip
+          if-no-files-found: error
+          retention-days: 14
