@@ -29,6 +29,52 @@ This document defines the first interoperable contract for the Android game clie
 }
 ```
 
+## Desktop-generated QR pairing and Android start command
+
+### Pairing lifecycle
+
+1. Desktop generates a cryptographically random, short-lived, single-use pairing token.
+2. Desktop renders a QR code containing only the protocol version, host address/port, desktop instance ID and pairing token. Never encode a model API key or long-lived credential.
+3. Android scans and displays the desktop identity and requested permissions.
+4. The user explicitly confirms on Android.
+5. Android sends the pairing request. Desktop validates token expiry, single-use status and the expected protocol version.
+6. Both sides authenticate the session and negotiate transport/capabilities. Only then emit companion.pairing with status paired_ready.
+7. Exchange short-lived session credentials; rotate/revoke them on disconnect, unpair or expiry.
+
+Suggested events:
+- pairing.request: one-time token reference, Android device metadata and requested permissions.
+- pairing.confirm: explicit user consent and approved permission set.
+- pairing.result: accepted/rejected, desktop identity, session ID, negotiated capabilities and error code.
+- device.status: authenticated connection state and heartbeat.
+
+A QR decode alone is not pairing. A declined request, invalid/expired/replayed token, failed authentication or unreachable desktop must not be shown as connected.
+
+### Model configuration discovery
+
+The desktop host is authoritative for the active DSH model/API configuration. After pairing, the desktop resolves the provider ID, API endpoint, model ID, secret reference and declared capabilities from the DSH integration. The Android app receives only safe display metadata and session status; it must never receive the provider API key.
+
+When the active DSH model changes, the host should:
+1. Detect the configuration revision/change.
+2. Validate the new endpoint and required task capabilities with a bounded probe.
+3. Switch at a safe session boundary and publish the selected provider/model status.
+4. Preserve task context where possible.
+5. Pause and report a clear error if no compatible healthy model is available.
+
+Do not infer the provider by inspecting or guessing from the API key string. Use the provider/model configuration selected in DSH. A text-only model cannot directly interpret raw screenshots; use local desktop computer vision to produce structured visual state, or route selected images only to a model explicitly supporting image input.
+
+### Start, pause and stop
+
+The Android Start button sends a command to the desktop host; it does not independently start model inference on the phone.
+
+Suggested events:
+- game.session_start_request: game package/title, selected game profile, requested mode and user session intent.
+- game.session_start_result: accepted/rejected, session ID, active provider/model display metadata, readiness checks and reason.
+- game.session_state: idle, preparing, running, paused, stopping, stopped, recovering or error.
+- game.session_pause / game.session_resume / game.session_stop: user control commands.
+- game.session_event: concise progress, current objective, status and verified outcome.
+
+Before accepting Start, the host checks authenticated pairing, screen-capture/input permissions, active model health, required vision/reasoning capabilities, game profile availability and stop-control readiness. If any required check fails, reject the start request with a user-readable reason. Stop/pause from either client overrides autonomous actions.
+
 ## Core events
 
 ### Device and observation
