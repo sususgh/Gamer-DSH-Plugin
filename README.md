@@ -138,7 +138,7 @@ The game runs on the Android phone. **The computer remains the primary AI workst
 
 The data split is configurable. Not every frame must be uploaded to a model API: local preprocessing can reduce image size and send only the relevant frame, crop, extracted state and context required for a decision.
 
-## 3. Architecture overview
+## 5. Architecture overview
 
 ```text
                          User
@@ -193,7 +193,7 @@ The data split is configurable. Not every frame must be uploaded to a model API:
 
 The DSH plugin coordinates the agent and tools. The desktop engine is the main runtime and processing center. Model adapters provide reasoning. PC and Android adapters connect the runtime to the actual game device.
 
-## 4. Main processing loop
+## 6. Main processing loop
 
 The intended loop is:
 
@@ -210,7 +210,7 @@ The intended loop is:
 
 Prefer short, verifiable actions over long blind action sequences. When observations are stale, the model is unavailable or the state is uncertain, stop issuing new inputs until the system recovers.
 
-## 5. DeepSeek API and model integration
+## 7. DeepSeek API and model integration
 
 The model provider is separated from game control so that the project is not locked to a single vendor.
 
@@ -260,7 +260,7 @@ gamer:
 
 Store secrets in environment variables or a local secret manager. Never commit API keys, access tokens or device credentials.
 
-## 6. Local model discovery and failover
+## 8. Local model discovery and failover
 
 The desktop control center is intended to discover configured local model endpoints, check their health and route tasks to a compatible model.
 
@@ -277,7 +277,7 @@ Failover policy:
 
 A running process alone does not prove that a model is healthy. For screenshot understanding, the health check must verify vision capability using a representative image input.
 
-## 7. Android connection and data transport
+## 9. Android connection and data transport
 
 The desktop and Android app require explicit, authenticated pairing.
 
@@ -303,7 +303,7 @@ Do not expose ADB or unauthenticated control ports to the public internet.
 
 See [Gamer-Mobile ↔ Gamer-DSH Runtime Protocol v1](docs/runtime-protocol-v1.md).
 
-## 8. Desktop control center and telemetry
+## 10. Desktop control center and telemetry
 
 The desktop UI is a view of actual runtime events, not the source of truth. Its intended capabilities include:
 
@@ -319,7 +319,7 @@ Telemetry must come from real measurements. TCP and UDP metrics must be reported
 
 Open `desktop-ui/index.html` in a modern browser to inspect the current UI prototype. Its telemetry panel intentionally shows “等待连接”; the animated trace is decorative until a real telemetry source is integrated.
 
-## 9. Companion state and voice
+## 11. Companion state and voice
 
 The Android app and desktop UI can display the same logical companion session. The desktop host is authoritative for task and game state; the phone reports execution and can play optional local TTS.
 
@@ -329,7 +329,7 @@ Optional voice playback should use a user-selected installed voice or a properly
 
 The companion is a user-interface character and does not imply that the model is conscious.
 
-## 10. Safety, privacy and user control
+## 12. Safety, privacy and user control
 
 - Keep screenshots, game state and device data on the user's computer by default.
 - Send only the minimum context needed to the selected model API.
@@ -343,7 +343,7 @@ The companion is a user-interface character and does not imply that the model is
 - Require explicit approval for purchases, premium-currency spending, save deletion or other irreversible/account-sensitive actions.
 - Respect game terms, anti-cheat rules and applicable laws. Do not bypass anti-cheat, access controls or platform protections.
 
-## 11. Repository layout
+## 13. Repository layout
 
 - `desktop-ui/` — responsive desktop dashboard prototype.
 - `docs/architecture.md` — runtime architecture and integration contract.
@@ -352,7 +352,7 @@ The companion is a user-interface character and does not imply that the model is
 
 Platform-specific code should stay behind adapters. DSH orchestration, model providers and device transports should remain independently testable.
 
-## 12. Development roadmap
+## 14. Development roadmap
 
 ### Phase 1 — Foundation
 - Establish the DSH plugin entry point and package structure.
@@ -381,13 +381,13 @@ Platform-specific code should stay behind adapters. DSH orchestration, model pro
 - Improve UI recognition and game-specific state adapters.
 - Publish tested releases with clear compatibility notes.
 
-## 13. Implementation status and honesty
+## 15. Implementation status and honesty
 
 The README and protocol documents define the target behavior and contracts. A feature should be called **implemented** only after its code exists, dependencies are declared and the workflow has been tested.
 
 This repository's current UI shell is a visual prototype. The presence of architecture documentation does not mean Android pairing, ADB control, PC input injection, OCR, model routing, live telemetry or automatic gameplay are already operational. Those capabilities must be delivered and verified module by module.
 
-## 14. Contributing
+## 16. Contributing
 
 Contributions are welcome in DSH integration, desktop vision, Android communication, model adapters, action validation, telemetry, documentation and testing.
 
