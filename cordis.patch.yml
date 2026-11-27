@@ -1,0 +1,4 @@
+# Mount Gamer as a native DSH plugin bundle.
+- insert:
+    - id: gamer-dsh-plugin
+      name: '@sususgh/gamer-dsh-plugin'
