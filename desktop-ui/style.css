@@ -26,3 +26,17 @@
 .profile-item b,.profile-item small{display:block}.profile-item b{font-size:11px;color:#526f81}.profile-item small{font-size:9px;color:#9aabb5;margin-top:4px}
 .profile-note{margin-top:12px;padding:11px 13px;border-radius:11px;background:#f0f5f7;color:#8da1ad;font-size:9px;line-height:1.8}
 @media(max-width:760px){.intelligence-grid,.profile-grid{grid-template-columns:1fr}.intel-card p{min-height:0}}
+
+
+/* Optional community Paimon TTS panel */
+.voice-panel{padding:21px 23px;margin-top:16px}
+.voice-layout{display:grid;grid-template-columns:104px minmax(0,1fr);gap:20px;margin-top:17px}
+.voice-avatar{width:88px;height:88px;border-radius:26px;display:grid;place-items:center;background:radial-gradient(circle at 35% 25%,#fff,#d7e9f2 48%,#c9c4e7);color:#829bc6;font-size:48px;box-shadow:0 10px 24px #a5bfd033}
+.voice-title{font-size:13px;font-weight:800;color:#49677a}
+.voice-settings p{font-size:10px;line-height:1.8;color:#8da1ad;margin:7px 0 12px}
+.voice-settings label{display:block;font-size:10px;color:#7e96a6;margin:10px 0 5px}
+.voice-settings input{width:100%;padding:10px 12px;border:1px solid #dfe9ee;border-radius:10px;background:#fbfdfe;color:#526b7b;font:inherit;font-size:11px;outline:none}
+.voice-actions{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
+#ttsAudio{display:block;width:min(100%,440px);height:34px;margin-top:9px}
+.voice-source{font-size:9px;color:#9aabb5;margin:10px 0 0}.voice-source a{color:#719bb1;text-decoration:none}.voice-source a:hover{text-decoration:underline}
+@media(max-width:600px){.voice-layout{grid-template-columns:1fr}.voice-avatar{width:64px;height:64px;font-size:34px}}
