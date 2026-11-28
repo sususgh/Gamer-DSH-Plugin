@@ -445,7 +445,7 @@ Platform-specific code should stay behind adapters. DSH orchestration, model pro
 
 The README and protocol documents define the target behavior and contracts. A feature should be called **implemented** only after its code exists, dependencies are declared and the workflow has been tested.
 
-This repository's current UI shell is a visual prototype. The presence of architecture documentation does not mean Android pairing, ADB control, PC input injection, OCR, model routing, live telemetry or automatic gameplay are already operational. Those capabilities must be delivered and verified module by module.
+This repository's desktop UI remains a prototype for most gameplay and telemetry features. The standalone desktop runtime can now generate a real, five-minute LAN QR code and validate its scan landing page. This is not a completed Android pairing: Android Companion identity submission, mutual authentication, ADB control, PC input injection, OCR, model routing, live telemetry and automatic gameplay are not yet operational. Those capabilities must be delivered and verified module by module.
 
 ## 16. Contributing
 
@@ -543,4 +543,4 @@ npx -y @deepseek-ai/dsh plugin --profile web add @sususgh/gamer-dsh-plugin@1.0.1
 
 See [DSH installation instructions](docs/DSH-INSTALL.zh-CN.md).
 
-**Current release (v1.0.1):** the native DSH package provides the plugin bundle, a status tool and a bilingual configuration page (简体中文 / English) on the bundle's own page in the DSH Plugins sidebar. The page includes an Android QR-pairing status panel. The desktop pairing server, real QR generation, Android APK/companion bridge, live visual perception and autonomous game actions are not implemented yet; the QR panel therefore reports that pairing is unavailable and does not display a fake scannable code. Installing the DSH bundle does not enable game control.
+**Current release (v1.0.1):** the native DSH package provides the plugin bundle, a status tool and a bilingual configuration page (简体中文 / English) on the bundle's own page in the DSH Plugins sidebar. The page includes an Android QR-pairing status panel. The standalone desktop runtime now provides real QR generation and a scan-validation landing page. The Android APK/companion bridge, device identity approval, authenticated session handshake, live visual perception and autonomous game actions are not implemented yet; scanning the QR does not mean the phone is paired. Installing the DSH bundle does not enable game control.
