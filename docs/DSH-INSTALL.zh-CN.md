@@ -19,26 +19,19 @@ Gamer 是 DSH 原生插件包，不是独立的 Windows EXE，也不是直接从
 
 要求：Node.js 22.13 或更高版本。电脑和手机需要连接同一个可信任的局域网。
 
-**Windows PowerShell：**
+**Windows：** 克隆仓库后，双击根目录 `start-windows.bat`，按提示输入端口（默认 8765）。
 
-```powershell
-git clone https://github.com/sususgh/Gamer-DSH-Plugin.git
-cd Gamer-DSH-Plugin\desktop-runtime
-npm install
-npm start
-```
-
-**Linux（Debian / Ubuntu 等）：**
+**Linux（Debian / Ubuntu）：**
 
 ```bash
 git clone https://github.com/sususgh/Gamer-DSH-Plugin.git
-cd Gamer-DSH-Plugin/desktop-runtime
-npm install
-npm start
+cd Gamer-DSH-Plugin
+bash start-linux.sh
 ```
 
-启动后在电脑浏览器打开 `http://127.0.0.1:8765`，选择手机能够访问的电脑局域网地址，点击 **生成二维码**。二维码有效期为 5 分钟，可手动撤销。Windows 防火墙如弹出提示，只允许在可信的专用网络中访问。
+也可以手动启动：进入 `desktop-runtime`，执行 `npm install`，然后设置环境变量 `GAMER_PORT=8765` 并运行 `npm start`。端口可改为 1–65535 之间未被占用的端口。
 
+打开 DSH 插件页，在“桌面服务端口 / Desktop port”填写与启动脚本相同的端口，点击“应用端口并重连”。电脑与手机需处于同一可信任局域网。若出现 `Failed to fetch`，检查启动窗口、端口一致性、本机防火墙和 DSH 本地网络权限。Windows 防火墙只允许在可信的专用网络中访问。
 手机相机扫码后会打开电脑的配对验证页。当前阶段实现的是**电脑端真实二维码生成与扫码落地页验证**；Android Companion 尚未实现设备身份提交、双端认证和会话握手，因此扫码成功不代表设备已连接，也不能开始游戏控制。不要将该 HTTP 服务或端口映射到公网。
 
 ## 当前功能状态
