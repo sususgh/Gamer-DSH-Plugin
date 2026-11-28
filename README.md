@@ -36,6 +36,12 @@ The desktop service listens on port 8765 and prints the computer's private LAN I
 
 If the browser blocks local-network access, allow the DSH application to access the local network and retry. The local API accepts browser origins from `deepseek.com` subdomains and localhost only. QR tokens expire after five minutes. Scanning the QR currently validates the one-time token and opens a landing page; it does **not** complete Android authentication or establish a connected companion session.
 
+## DSH model registry integration
+
+The plugin now injects the Harness `llm` service and registers the model-callable tool `gamer_list_ai_models`. When invoked by the active DSH model, it reads currently registered provider routes with `ctx.llm.listProviders()` and each provider's advertised models with `ctx.llm.listModels(provider)`. It returns provider/model identifiers and availability only; it never returns API keys or secret values.
+
+This confirms model-registry discovery, not phone gameplay. The active conversation model can call Gamer tools because they are registered through `ctx.tools`; however, authenticated Android transport, screen capture, vision inference, and device input adapters must all be implemented and validated before the model can actually play a phone game. The plugin must report those capabilities as unavailable until they pass runtime checks.
+
 ## 1. What the project does
 
 Gamer is designed to let an AI agent play supported games through a closed feedback loop:
