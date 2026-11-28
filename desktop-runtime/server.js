@@ -104,9 +104,10 @@ async function handle(req, res) {
     catch (error) { return sendJson(res, 400, { error: error.message }); }
 
     const addresses = getLanAddresses();
+    if (!addresses.length) return sendJson(res, 400, { error: 'NO_PRIVATE_LAN_IPV4' });
     const requestedHost = body.host;
     const selected = addresses.find(item => item.address === requestedHost);
-    const host = selected?.address || (addresses.length === 0 ? '127.0.0.1' : null);
+    const host = selected?.address || null;
     if (!host) return sendJson(res, 400, { error: 'INVALID_LAN_ADDRESS', addresses });
 
     const pairing = manager.create({ host, port: PORT });
@@ -129,7 +130,6 @@ async function handle(req, res) {
       createdAt: pairing.createdAt,
       expiresAt: pairing.expiresAt,
       qrDataUrl,
-      pairingUrl: pairingUrl.toString(),
       message: 'QR generated. Scanning is not the same as a completed device pairing.',
     });
   }
