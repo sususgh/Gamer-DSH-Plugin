@@ -25,7 +25,7 @@ export function apply(ctx) {
   ctx.tools.register({
     name: 'gamer_project_status',
     description:
-      'Return the verified implementation and runtime status of Gamer-DSH-Plugin. Use this before attempting to start or control a game. The current release provides a desktop UI prototype; it does not yet include a connected game-control runtime or Android companion bridge.',
+      'Return the verified implementation and runtime status of Gamer-DSH-Plugin. The v1.0.1 release includes a bilingual DSH plugin configuration page, but it does not yet include a connected game-control runtime, desktop pairing server or Android companion bridge.',
     parameters: STATUS_SCHEMA,
     output: {
       schema: {
@@ -64,7 +64,7 @@ export function apply(ctx) {
         version: '1.0.1',
         integration: 'native DSH bundle',
         pluginLoaded: true,
-        desktopUi: 'prototype',
+        desktopUi: 'plugin configuration page available; game-control dashboard prototype',
         androidCompanion: 'not connected',
         visionRuntime: 'not implemented',
         gameControlRuntime: 'not implemented',
