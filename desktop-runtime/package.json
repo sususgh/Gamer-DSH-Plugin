@@ -1,0 +1,17 @@
+{
+  "name": "gamer-desktop-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local Gamer desktop UI and short-lived QR pairing server",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check pairing.js"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}
