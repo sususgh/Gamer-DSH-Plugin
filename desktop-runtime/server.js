@@ -173,7 +173,7 @@ async function handle(req, res) {
   if (url.pathname === '/pair' && req.method === 'GET') {
     const valid = url.searchParams.get('protocol') === 'gamer-runtime/1'
       && url.searchParams.get('instance_id') === manager.instanceId
-      && manager.verify(url.searchParams.get('token'));
+      && manager.verify(url.searchParams.get('token'), { consume: true });
     res.writeHead(valid ? 200 : 410, {
       'content-type': 'text/html; charset=utf-8',
       'cache-control': 'no-store',
