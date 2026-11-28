@@ -7,7 +7,7 @@ window.__ModuleLoader__.load({
 
     const COPY = {
       zh: {
-        title: 'Gamer 游戏智能体', subtitle: 'PC 游戏控制中心 · Android 手机伴侣', version: '版本 1.0.5',
+        title: 'Gamer 游戏智能体', subtitle: 'PC 游戏控制中心 · Android 手机伴侣', version: '版本 1.0.7',
         overview: '运行状态', ready: 'DSH 插件入口已加载',
         desktop: '桌面端控制台', desktopValue: '界面框架已提供，游戏运行时尚未接入',
         android: 'Android 手机伴侣', androidValue: '通信服务尚未接入',
@@ -23,7 +23,7 @@ window.__ModuleLoader__.load({
         status: '未连接', noGameControl: '当前版本不会控制游戏或发送键鼠/触控指令。'
       },
       en: {
-        title: 'Gamer AI Agent', subtitle: 'PC game control center · Android companion', version: 'Version 1.0.5',
+        title: 'Gamer AI Agent', subtitle: 'PC game control center · Android companion', version: 'Version 1.0.7',
         overview: 'Runtime status', ready: 'Native DSH plugin entry loaded',
         desktop: 'Desktop control center', desktopValue: 'UI shell is present; game runtime is not connected',
         android: 'Android companion', androidValue: 'Communication service is not connected',
@@ -138,7 +138,7 @@ window.__ModuleLoader__.load({
           h('div', null,
             h('div', { style: { fontSize: '19px', fontWeight: 700 } }, c.title),
             h('div', { style: { marginTop: '5px', fontSize: '12px', color: 'var(--dsw-alias-label-tertiary, #888)' } }, c.subtitle),
-            h('div', { style: { marginTop: '5px', fontSize: '11px', color: 'var(--dsw-alias-label-tertiary, #888)' } }, '版本 1.0.2')
+            h('div', { style: { marginTop: '5px', fontSize: '11px', color: 'var(--dsw-alias-label-tertiary, #888)' } }, c.version)
           ),
           h('div', { role: 'group', 'aria-label': c.language, style: { display: 'flex', gap: '4px', padding: '3px', borderRadius: '10px', background: 'var(--dsw-alias-bg-layer-2, rgba(127,127,127,.08))' } },
             ...[['zh', c.chinese], ['en', c.english]].map(([key, label]) => h('button', {
