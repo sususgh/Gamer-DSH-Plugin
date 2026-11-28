@@ -83,6 +83,34 @@ function pairLandingPage(valid) {
 
 async function handle(req, res) {
   const url = new URL(req.url, 'http://127.0.0.1');
+  const origin = req.headers.origin;
+  const allowedOrigin = !origin || (() => {
+    try {
+      const parsed = new URL(origin);
+      const host = parsed.hostname.toLowerCase();
+      return host === 'deepseek.com' || host.endsWith('.deepseek.com')
+        || host === 'localhost' || host === '127.0.0.1';
+    } catch { return false; }
+  })();
+  if (origin && allowedOrigin) {
+    res.setHeader('access-control-allow-origin', origin);
+    res.setHeader('vary', 'Origin');
+  }
+  if (url.pathname.startsWith('/api/') && origin && !allowedOrigin) {
+    return sendJson(res, 403, { error: 'ORIGIN_NOT_ALLOWED' });
+  }
+  if (url.pathname.startsWith('/api/') && req.method === 'OPTIONS') {
+    if (!allowedOrigin) return sendJson(res, 403, { error: 'ORIGIN_NOT_ALLOWED' });
+    res.writeHead(204, {
+      'access-control-allow-methods': 'GET, POST, OPTIONS',
+      'access-control-allow-headers': 'content-type',
+      'access-control-allow-private-network': 'true',
+      'access-control-max-age': '600',
+      'cache-control': 'no-store',
+      'vary': 'Origin',
+    });
+    return res.end();
+  }
   res.setHeader('x-content-type-options', 'nosniff');
   res.setHeader('referrer-policy', 'no-referrer');
   res.setHeader('cache-control', 'no-store');
