@@ -10,6 +10,10 @@ import { PairingManager } from './pairing.js';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const UI_ROOT = path.join(ROOT, 'desktop-ui');
 const PORT = Number.parseInt(process.env.GAMER_PORT || '8765', 10);
+if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
+  console.error('[gamer-desktop] Invalid GAMER_PORT. Use an integer from 1 to 65535.');
+  process.exit(1);
+}
 const manager = new PairingManager();
 const pairedSessions = new Map();
 const MIME = {
