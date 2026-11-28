@@ -12,7 +12,84 @@ function draw(){const dpr=Math.max(1,window.devicePixelRatio||1),w=canvas.client
 
 /* Model selection UI is intentionally empty until the real local-model registry reports installed models. */
 $('selectAllModels')?.addEventListener('click',()=>{log('模型列表尚未从本地运行时加载，暂时没有可选择的模型。');});
-$('pairRefresh')?.addEventListener('click',()=>{log('安全配对服务尚未启动，当前不能生成真实二维码。');});
+/* Desktop-generated, real QR pairing. The UI must be served by desktop-runtime/server.js. */
+const pairQrImage=$('pairQrImage');
+const pairQrEmpty=$('pairQrEmpty');
+const pairHostSelect=$('pairHostSelect');
+const pairRefresh=$('pairRefresh');
+const pairStop=$('pairStop');
+let pairExpiryTimer=null;
+
+function setPairState(text){$('pairState').textContent=text;}
+function clearPairQr(){
+  if(pairQrImage){pairQrImage.hidden=true;pairQrImage.removeAttribute('src');}
+  if(pairQrEmpty)pairQrEmpty.hidden=false;
+  $('pairQrCaption').textContent='点击生成二维码';
+  $('pairExpires').textContent='5 分钟 · 未生成';
+  if(pairStop)pairStop.disabled=true;
+  if(pairExpiryTimer){clearInterval(pairExpiryTimer);pairExpiryTimer=null;}
+}
+async function loadPairNetworks(){
+  try{
+    const response=await fetch('/api/network/interfaces',{cache:'no-store'});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    const data=await response.json();
+    pairHostSelect.replaceChildren();
+    for(const item of data.addresses||[]){
+      const option=document.createElement('option');
+      option.value=item.address;option.textContent=item.name+' · '+item.address;
+      pairHostSelect.append(option);
+    }
+    if(!pairHostSelect.options.length){
+      const option=document.createElement('option');option.value='';option.textContent='未发现局域网 IPv4 地址';pairHostSelect.append(option);
+      $('pairHost').textContent='未发现局域网地址';
+      setPairState('请连接 Wi-Fi 或检查网络');
+    }else{
+      $('pairHost').textContent=pairHostSelect.value;
+      setPairState('配对服务已就绪');
+    }
+  }catch(error){
+    pairHostSelect.replaceChildren();
+    const option=document.createElement('option');option.value='';option.textContent='桌面配对服务未启动';pairHostSelect.append(option);
+    setPairState('请通过启动脚本打开桌面控制台');
+    log('无法连接桌面配对服务：'+error.message+'。请勿直接双击 index.html。');
+  }
+}
+pairHostSelect?.addEventListener('change',()=>{$('pairHost').textContent=pairHostSelect.value||'未选择';});
+pairRefresh?.addEventListener('click',async()=>{
+  try{
+    pairRefresh.disabled=true;setPairState('正在生成安全二维码…');
+    const response=await fetch('/api/pairing/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({host:pairHostSelect.value})});
+    const data=await response.json();
+    if(!response.ok)throw new Error(data.error||'HTTP '+response.status);
+    pairQrImage.src=data.qrDataUrl;pairQrImage.hidden=false;pairQrEmpty.hidden=true;
+    $('pairQrCaption').textContent='真实二维码 · 手机扫码';
+    $('pairHost').textContent=data.host+':'+data.port;
+    $('pairExpires').textContent='05:00';
+    setPairState('二维码已生成 · 等待手机扫码');
+    pairStop.disabled=false;
+    if(pairExpiryTimer)clearInterval(pairExpiryTimer);
+    const expiresAt=data.expiresAt;
+    pairExpiryTimer=setInterval(()=>{
+      const remaining=Math.max(0,expiresAt-Date.now());
+      const mm=String(Math.floor(remaining/60000)).padStart(2,'0');
+      const ss=String(Math.floor((remaining%60000)/1000)).padStart(2,'0');
+      $('pairExpires').textContent=mm+':'+ss;
+      if(remaining<=0){clearInterval(pairExpiryTimer);pairExpiryTimer=null;clearPairQr();setPairState('二维码已过期，请重新生成');log('手机配对二维码已过期。');}
+    },250);
+    log('电脑端已生成真实配对二维码：'+data.host+':'+data.port+'，有效期 5 分钟。');
+  }catch(error){
+    setPairState('生成失败：'+error.message);log('二维码生成失败：'+error.message);
+  }finally{pairRefresh.disabled=false;}
+});
+pairStop?.addEventListener('click',async()=>{
+  try{
+    const response=await fetch('/api/pairing/stop',{method:'POST'});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    clearPairQr();setPairState('二维码已撤销');log('电脑端配对二维码已撤销。');
+  }catch(error){setPairState('撤销失败：'+error.message);log('撤销二维码失败：'+error.message);}
+});
+loadPairNetworks();
 
 
 $('visionTestBtn')?.addEventListener('click',()=>{log('视觉自检请求已记录；当前仓库尚未接入帧采集、OCR 或目标检测运行时。');$('visionEngineState').textContent='运行时未接入';});
