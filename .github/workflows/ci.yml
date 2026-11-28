@@ -38,8 +38,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Check JavaScript syntax
-        run: node --check desktop-ui/app.js
+      - name: Install desktop QR dependency
+        run: npm --prefix desktop-runtime install --ignore-scripts --no-audit --no-fund
+      - name: Check desktop runtime and UI syntax
+        run: npm --prefix desktop-runtime run check && node --check desktop-ui/app.js
       - name: Verify required UI files
         shell: bash
         run: |
@@ -47,6 +49,11 @@ jobs:
           test -s desktop-ui/index.html
           test -s desktop-ui/app.js
           test -s desktop-ui/style.css
+          test -s desktop-runtime/server.js
+          test -s desktop-runtime/pairing.js
+          test -s desktop-runtime/package.json
+          test -s desktop-runtime/start-windows.bat
+          test -s desktop-runtime/start-linux.sh
           test -s README.md
           test -s LICENSE
           test -s docs/runtime-protocol-v1.md
