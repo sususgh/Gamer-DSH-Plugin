@@ -1,6 +1,6 @@
 {
   "name": "@sususgh/gamer-dsh-plugin",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Native DeepSeek Harness plugin with automatic desktop QR pairing and Gamer runtime UI",
   "type": "module",
   "license": "Apache-2.0",
