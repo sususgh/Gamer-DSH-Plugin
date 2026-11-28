@@ -1,7 +1,7 @@
 {
   "name": "@sususgh/gamer-dsh-plugin",
-  "version": "1.0.4",
-  "description": "Native DeepSeek Harness plugin with automatic desktop QR pairing and Gamer runtime UI",
+  "version": "1.0.5",
+  "description": "Gamer 游戏智能体：PC 游戏控制中心与 Android 手机伴侣，支持本地配对服务和自定义端口。 | Gamer AI game agent for PC and Android with local QR pairing and a configurable desktop port.",
   "type": "module",
   "license": "Apache-2.0",
   "author": "sususgh",
@@ -29,7 +29,9 @@
     "LICENSE",
     "docs/DSH-INSTALL.zh-CN.md",
     "docs/runtime-protocol-v1.md",
-    "locale"
+    "locale",
+    "start-windows.bat",
+    "start-linux.sh"
   ],
   "exports": {
     ".": "./dsh/index.js",
