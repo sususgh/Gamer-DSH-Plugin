@@ -27,6 +27,36 @@ export function apply(ctx) {
     description:
       'Return the verified implementation and runtime status of Gamer-DSH-Plugin. Use this before attempting to start or control a game. The current release provides a desktop UI prototype; it does not yet include a connected game-control runtime or Android companion bridge.',
     parameters: STATUS_SCHEMA,
+    output: {
+      schema: {
+        type: 'object',
+        properties: {
+          project: { type: 'string' },
+          version: { type: 'string' },
+          integration: { type: 'string' },
+          pluginLoaded: { type: 'boolean' },
+          desktopUi: { type: 'string' },
+          androidCompanion: { type: 'string' },
+          visionRuntime: { type: 'string' },
+          gameControlRuntime: { type: 'string' },
+          qrPairing: { type: 'string' },
+          canControlGames: { type: 'boolean' },
+          nextStep: { type: 'string' },
+          repository: { type: 'string' },
+          release: { type: 'string' },
+        },
+        required: [
+          'project', 'version', 'integration', 'pluginLoaded', 'desktopUi',
+          'androidCompanion', 'visionRuntime', 'gameControlRuntime', 'qrPairing',
+          'canControlGames', 'nextStep', 'repository', 'release',
+        ],
+        additionalProperties: false,
+      },
+      render: (_args, value) => [{
+        type: 'text',
+        text: JSON.stringify(value, null, 2),
+      }],
+    },
     async execute() {
       return {
         project: 'Gamer-DSH-Plugin',
