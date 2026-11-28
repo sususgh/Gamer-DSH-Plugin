@@ -1,6 +1,6 @@
 {
   "name": "@sususgh/gamer-dsh-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Native DeepSeek Harness plugin for the Gamer AI game-agent project",
   "type": "module",
   "license": "Apache-2.0",
@@ -25,20 +25,24 @@
     "cordis.patch.yml",
     "README.md",
     "LICENSE",
-    "docs/DSH-INSTALL.zh-CN.md"
+    "docs/DSH-INSTALL.zh-CN.md",
+    "locale"
   ],
   "exports": {
     ".": "./dsh/index.js",
     "./dsh": "./dsh/index.js",
     "./client": "./dsh/client.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./locale/*": "./locale/*.json"
   },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
     },
     "client": {
-      "inject": [],
+      "inject": [
+        "slots"
+      ],
       "platform": "web",
       "immediately": true
     }
