@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { createHash, randomBytes } from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
@@ -10,6 +11,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const UI_ROOT = path.join(ROOT, 'desktop-ui');
 const PORT = Number.parseInt(process.env.GAMER_PORT || '8765', 10);
 const manager = new PairingManager();
+const pairedSessions = new Map();
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -162,18 +164,61 @@ async function handle(req, res) {
     });
   }
 
+  if (url.pathname === '/api/pairing/claim' && req.method === 'POST') {
+    let body;
+    try { body = await readJson(req); }
+    catch (error) { return sendJson(res, 400, { error: error.message }); }
+    if (body.protocol !== 'gamer-runtime/1' || body.instance_id !== manager.instanceId
+      || typeof body.device_id !== 'string' || body.device_id.length < 8 || body.device_id.length > 128
+      || typeof body.device_name !== 'string' || body.device_name.length > 120) {
+      return sendJson(res, 400, { error: 'INVALID_PAIRING_REQUEST' });
+    }
+    if (!manager.verify(body.token, { consume: true })) {
+      return sendJson(res, 410, { error: 'PAIRING_TOKEN_INVALID_EXPIRED_OR_USED' });
+    }
+    const sessionId = randomBytes(18).toString('base64url');
+    const sessionToken = randomBytes(32).toString('base64url');
+    pairedSessions.set(sessionId, {
+      tokenHash: createHash('sha256').update(sessionToken).digest('hex'),
+      deviceId: body.device_id,
+      deviceName: body.device_name,
+      createdAt: Date.now(),
+      lastSeenAt: Date.now(),
+    });
+    return sendJson(res, 200, {
+      paired: true,
+      protocol: 'gamer-runtime/1',
+      instanceId: manager.instanceId,
+      sessionId,
+      sessionToken,
+      device: { id: body.device_id, name: body.device_name },
+      capabilities: { pairing: true, heartbeat: true, screenCapture: false, inputControl: false, modelInference: false },
+    });
+  }
+
+  if (url.pathname === '/api/pairing/heartbeat' && req.method === 'POST') {
+    const auth = req.headers.authorization || '';
+    const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+    const hash = createHash('sha256').update(token).digest('hex');
+    const entry = [...pairedSessions.entries()].find(([, value]) => value.tokenHash === hash);
+    if (!entry) return sendJson(res, 401, { error: 'SESSION_UNAUTHORIZED' });
+    entry[1].lastSeenAt = Date.now();
+    return sendJson(res, 200, { connected: true, sessionId: entry[0], serverTime: Date.now() });
+  }
+
   if (url.pathname === '/api/pairing/stop' && req.method === 'POST') {
     if (!isLoopback(req.socket.remoteAddress)) {
       return sendJson(res, 403, { error: 'PAIRING_CONTROL_LOCAL_ONLY' });
     }
     manager.stop();
-    return sendJson(res, 200, { active: false });
+    pairedSessions.clear();
+    return sendJson(res, 200, { active: false, sessionsRevoked: true });
   }
 
   if (url.pathname === '/pair' && req.method === 'GET') {
     const valid = url.searchParams.get('protocol') === 'gamer-runtime/1'
       && url.searchParams.get('instance_id') === manager.instanceId
-      && manager.verify(url.searchParams.get('token'), { consume: true });
+      && manager.verify(url.searchParams.get('token'));
     res.writeHead(valid ? 200 : 410, {
       'content-type': 'text/html; charset=utf-8',
       'cache-control': 'no-store',
