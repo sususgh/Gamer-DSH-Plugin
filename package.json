@@ -1,6 +1,6 @@
 {
   "name": "@sususgh/gamer-dsh-plugin",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Gamer 游戏智能体：PC 控制中心 + Android 手机伴侣。启动：Windows 双击 start-windows.bat；Linux 执行 bash start-linux.sh。端口可自定义。 | Gamer AI agent for PC + Android. Start: Windows start-windows.bat; Linux bash start-linux.sh. Custom port supported.",
   "type": "module",
   "license": "Apache-2.0",
