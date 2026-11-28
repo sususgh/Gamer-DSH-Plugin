@@ -30,10 +30,24 @@
     <section class="panel pairing-panel">
       <div class="section-head"><div><div class="eyebrow">CROSS-DEVICE PAIRING</div><h2>手机 · 电脑 · AI 模型配对</h2></div><span class="tag pale">ONE ACCOUNT · TWO SCREENS</span></div>
       <div class="pairing-layout">
-        <div class="qr-placeholder" aria-label="真实配对二维码待后端服务生成"><div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-center">✦<small>PAIR</small></div><div class="qr-corner bl"></div><div class="qr-corner br"></div></div>
-        <div class="pairing-copy"><h3>用手机版扫描二维码</h3><p>扫码后将手机与这台电脑安全配对。模型继续在电脑本地运行，手机负责画面采集与触控执行。</p><div class="pairing-meta"><span>配对状态</span><b id="pairState">等待配对服务</b></div><div class="pairing-meta"><span>连接方式</span><b>局域网 Wi-Fi / USB</b></div><button class="soft" id="pairRefresh" disabled>等待安全配对服务接入</button></div>
+        <div class="qr-frame">
+          <div class="qr-placeholder" id="pairQrEmpty" aria-label="尚未生成二维码"><div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-center">✦<small>READY</small></div><div class="qr-corner bl"></div><div class="qr-corner br"></div></div>
+          <img id="pairQrImage" class="pair-qr-image" alt="电脑生成的 Gamer 手机配对二维码" hidden>
+          <small id="pairQrCaption">点击生成二维码</small>
+        </div>
+        <div class="pairing-copy">
+          <h3>手机扫描电脑二维码</h3>
+          <p>电脑生成一次性配对二维码，手机与电脑需处于同一局域网。二维码只包含短期配对凭证和电脑地址，不包含模型 API Key。</p>
+          <div class="pairing-meta"><span>配对状态</span><b id="pairState">服务尚未启动</b></div>
+          <div class="pairing-meta"><span>电脑地址</span><b id="pairHost">等待选择网络</b></div>
+          <div class="pairing-meta"><span>二维码有效期</span><b id="pairExpires">5 分钟 · 未生成</b></div>
+          <label class="pair-host-label" for="pairHostSelect">选择手机可访问的电脑网络</label>
+          <select id="pairHostSelect" class="pair-host-select"><option value="">正在检测局域网地址…</option></select>
+          <div class="pairing-buttons"><button class="primary" id="pairRefresh">生成二维码</button><button class="soft" id="pairStop" disabled>撤销二维码</button></div>
+          <p class="pair-mobile-note">说明：当前版本已实现电脑端真实二维码生成和扫码落地页；Android Companion 尚未接入，扫码识别不等于手机已配对。</p>
+        </div>
       </div>
-      <p class="hint">当前二维码区域为占位框，不是可扫描二维码。正式配对将使用短时有效的一次性令牌，不在二维码中放置模型密钥。</p>
+      <p class="hint">二维码 5 分钟后过期，可随时撤销并重新生成。配对控制接口仅允许电脑本机访问，手机只能访问配对落地页。</p>
     </section>
 
     <section class="stats-grid">
