@@ -56,11 +56,12 @@ export function apply(ctx) {
         type: 'text',
         text: JSON.stringify(value, null, 2),
       }],
+      presentationMeta: () => ({}),
     },
     async execute() {
       return {
         project: 'Gamer-DSH-Plugin',
-        version: '1.0.0',
+        version: '1.0.1',
         integration: 'native DSH bundle',
         pluginLoaded: true,
         desktopUi: 'prototype',
@@ -71,7 +72,7 @@ export function apply(ctx) {
         canControlGames: false,
         nextStep: 'Complete and validate the desktop engine and Android companion before enabling game-control tools.',
         repository: 'https://github.com/sususgh/Gamer-DSH-Plugin',
-        release: 'https://github.com/sususgh/Gamer-DSH-Plugin/releases/tag/v1.0.0'
+        release: 'https://github.com/sususgh/Gamer-DSH-Plugin/releases/tag/v1.0.1'
       };
     }
   });
