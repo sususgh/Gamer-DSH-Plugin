@@ -7,8 +7,6 @@ on:
       - main
     paths:
       - "package.json"
-    tags:
-      - "npm-v*"
 
 permissions:
   contents: read
