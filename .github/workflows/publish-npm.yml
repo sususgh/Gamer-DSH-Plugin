@@ -3,11 +3,16 @@ name: Publish Gamer DSH Plugin to npm
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
+    paths:
+      - "package.json"
     tags:
       - "npm-v*"
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   publish:
@@ -26,6 +31,6 @@ jobs:
           npm test
           npm pack --dry-run
       - name: Publish
-        run: npm publish --access public
+        run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
