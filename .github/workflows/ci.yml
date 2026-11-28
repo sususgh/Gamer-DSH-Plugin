@@ -66,11 +66,11 @@ jobs:
       - name: Package desktop UI prototype
         run: |
           mkdir -p dist
-          zip -r dist/gamer-desktop-ui-prototype.zip desktop-ui docs README.md LICENSE
+          zip -r dist/gamer-desktop-qr-pairing.zip desktop-ui desktop-runtime docs README.md LICENSE
       - name: Upload prototype artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gamer-desktop-ui-prototype
-          path: dist/gamer-desktop-ui-prototype.zip
+          name: gamer-desktop-qr-pairing
+          path: dist/gamer-desktop-qr-pairing.zip
           if-no-files-found: error
           retention-days: 14
