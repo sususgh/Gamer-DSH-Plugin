@@ -537,9 +537,9 @@ The repository now includes a native DSH bundle package manifest and plugin entr
 
 For CLI-managed profiles, use:
 ```bash
-npx -y @deepseek-ai/dsh plugin --profile web add @sususgh/gamer-dsh-plugin@1.0.0
+npx -y @deepseek-ai/dsh plugin --profile web add @sususgh/gamer-dsh-plugin@1.0.1
 ```
 
 See [DSH installation instructions](docs/DSH-INSTALL.zh-CN.md).
 
-**Important implementation status:** the native DSH package currently provides the plugin bundle, a status tool and a status card. The Windows game-control runtime, Android APK/companion bridge, QR pairing, live visual perception and autonomous game actions are not implemented yet. Installing the DSH bundle does not enable game control.
+**Current release (v1.0.1):** the native DSH package provides the plugin bundle, a status tool and a bilingual configuration page (简体中文 / English) on the bundle's own page in the DSH Plugins sidebar. The page includes an Android QR-pairing status panel. The desktop pairing server, real QR generation, Android APK/companion bridge, live visual perception and autonomous game actions are not implemented yet; the QR panel therefore reports that pairing is unavailable and does not display a fake scannable code. Installing the DSH bundle does not enable game control.
