@@ -1,7 +1,7 @@
 {
   "name": "@sususgh/gamer-dsh-plugin",
-  "version": "1.0.1",
-  "description": "Native DeepSeek Harness plugin with desktop QR pairing runtime and UI for the Gamer AI game-agent project",
+  "version": "1.0.2",
+  "description": "Native DeepSeek Harness plugin with automatic desktop QR pairing and Gamer runtime UI",
   "type": "module",
   "license": "Apache-2.0",
   "author": "sususgh",
@@ -52,12 +52,17 @@
   },
   "scripts": {
     "test": "node --test",
-    "check": "node --check dsh/index.js && node --check dsh/client.js && node --check desktop-runtime/pairing.js && node --check desktop-runtime/server.js && node --check desktop-ui/app.js"
+    "check": "node --check dsh/index.js && node --check dsh/client.js && node --check desktop-runtime/pairing.js && node --check desktop-runtime/server.js && node --check desktop-ui/app.js",
+    "desktop": "node desktop-runtime/server.js",
+    "start:desktop": "node desktop-runtime/server.js"
   },
   "publishConfig": {
     "access": "public"
   },
   "engines": {
     "node": ">=22.13"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
   }
 }
