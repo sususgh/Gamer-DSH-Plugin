@@ -44,14 +44,17 @@ async function loadPairNetworks(){
       const option=document.createElement('option');option.value='';option.textContent='未发现局域网 IPv4 地址';pairHostSelect.append(option);
       $('pairHost').textContent='未发现局域网地址';
       setPairState('请连接 Wi-Fi 或检查网络');
+      pairRefresh.disabled=true;
     }else{
       $('pairHost').textContent=pairHostSelect.value;
       setPairState('配对服务已就绪');
+      pairRefresh.disabled=false;
     }
   }catch(error){
     pairHostSelect.replaceChildren();
     const option=document.createElement('option');option.value='';option.textContent='桌面配对服务未启动';pairHostSelect.append(option);
     setPairState('请通过启动脚本打开桌面控制台');
+    pairRefresh.disabled=true;
     log('无法连接桌面配对服务：'+error.message+'。请勿直接双击 index.html。');
   }
 }
@@ -80,7 +83,7 @@ pairRefresh?.addEventListener('click',async()=>{
     log('电脑端已生成真实配对二维码：'+data.host+':'+data.port+'，有效期 5 分钟。');
   }catch(error){
     setPairState('生成失败：'+error.message);log('二维码生成失败：'+error.message);
-  }finally{pairRefresh.disabled=false;}
+  }finally{pairRefresh.disabled=!pairHostSelect.value;}
 });
 pairStop?.addEventListener('click',async()=>{
   try{
