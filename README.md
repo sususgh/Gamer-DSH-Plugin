@@ -367,7 +367,7 @@ The desktop UI is a view of actual runtime events, not the source of truth. Its 
 
 Telemetry must come from real measurements. TCP and UDP metrics must be reported separately. Do not infer UDP packet loss from TCP metrics. If a metric is unavailable, show N/A rather than a fabricated zero. Decorative animation must not be presented as real network traffic.
 
-Open `desktop-ui/index.html` in a modern browser to inspect the current UI prototype. Its telemetry panel intentionally shows “等待连接”; the animated trace is decorative until a real telemetry source is integrated.
+**Run the desktop UI with its local pairing service (Node.js 22.13+):** do not open `desktop-ui/index.html` directly. From the repository root run `cd desktop-runtime`, `npm install`, then `npm start`; open `http://127.0.0.1:8765` on the computer. Choose the computer's LAN adapter and click **生成二维码**. The QR is generated locally and expires after five minutes. The phone must be on the same trusted LAN. Scanning opens a validation page; it does not yet complete Android pairing because the Android Companion handshake is not implemented. Never expose this HTTP pairing service to the public internet. The telemetry panel still shows “等待连接”; its animated trace is decorative until a real telemetry source is integrated.
 
 ## 11. Companion state and voice
 
@@ -404,7 +404,8 @@ The integration is optional and endpoint-based. The voice service should remain 
 
 ## 13. Repository layout
 
-- `desktop-ui/` — responsive desktop dashboard prototype.
+- `desktop-ui/` — responsive desktop dashboard and real QR preview.
+- `desktop-runtime/` — local HTTP server, LAN interface discovery, short-lived QR token manager and QR image generation.
 - `docs/architecture.md` — runtime architecture and integration contract.
 - `docs/runtime-protocol-v1.md` — Android ↔ desktop pairing, observations, actions, telemetry, model failover and companion protocol.
 - Future runtime modules — Android bridge, telemetry collector, local inference adapter, model health router, game-agent coordinator and PC input adapter.
