@@ -53,13 +53,85 @@ window.__ModuleLoader__.load({
 
     function GamerConfig() {
       const [language, setLanguage] = React.useState('zh');
+      const [pairState, setPairState] = React.useState('正在连接桌面配对服务…');
+      const [qr, setQr] = React.useState('');
+      const [host, setHost] = React.useState('');
+      const [remaining, setRemaining] = React.useState(0);
+      const [error, setError] = React.useState('');
+      const [busy, setBusy] = React.useState(false);
+      const [addresses, setAddresses] = React.useState([]);
       const c = COPY[language];
+      const base = 'http://127.0.0.1:8765';
+
+      const generateQr = React.useCallback(async (selectedHost) => {
+        if (!selectedHost) return;
+        setBusy(true); setError(''); setPairState('正在生成安全二维码…');
+        try {
+          const response = await fetch(base + '/api/pairing/start', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ host: selectedHost }),
+            cache: 'no-store'
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || ('HTTP ' + response.status));
+          if (!data.qrDataUrl || !data.expiresAt) throw new Error('桌面服务未返回有效二维码');
+          setQr(data.qrDataUrl);
+          setHost(data.host + ':' + data.port);
+          setRemaining(Math.max(0, Math.floor((data.expiresAt - Date.now()) / 1000)));
+          setPairState('二维码已生成 · 等待手机扫码');
+        } catch (e) {
+          setQr(''); setPairState('二维码生成失败'); setError(e.message || String(e));
+        } finally { setBusy(false); }
+      }, []);
+
+      const detectAndGenerate = React.useCallback(async () => {
+        setBusy(true); setError(''); setPairState('正在检测桌面配对服务…');
+        try {
+          const response = await fetch(base + '/api/network/interfaces', { cache: 'no-store' });
+          if (!response.ok) throw new Error('桌面配对服务返回 HTTP ' + response.status);
+          const data = await response.json();
+          const list = Array.isArray(data.addresses) ? data.addresses : [];
+          setAddresses(list);
+          if (!list.length) throw new Error('未发现可供手机访问的局域网 IPv4 地址；请让电脑和手机连接同一 Wi-Fi。');
+          const selected = list[0].address;
+          await generateQr(selected);
+        } catch (e) {
+          setQr(''); setPairState('桌面配对服务不可用');
+          setError((e.message || String(e)) + '。请先在电脑运行 Gamer 桌面端启动脚本，并确认端口 8765 可用。');
+          setBusy(false);
+        }
+      }, [generateQr]);
+
+      React.useEffect(() => {
+        let alive = true;
+        const boot = async () => { if (alive) await detectAndGenerate(); };
+        boot();
+        return () => { alive = false; };
+      }, [detectAndGenerate]);
+
+      React.useEffect(() => {
+        if (!qr || remaining <= 0) return undefined;
+        const timer = setInterval(() => setRemaining(value => Math.max(0, value - 1)), 1000);
+        return () => clearInterval(timer);
+      }, [qr, remaining > 0]);
+
+      React.useEffect(() => {
+        if (qr && remaining === 0) { setQr(''); setPairState('二维码已过期，请重新生成'); }
+      }, [remaining, qr]);
+
+      const revoke = async () => {
+        try {
+          await fetch(base + '/api/pairing/stop', { method: 'POST' });
+          setQr(''); setRemaining(0); setPairState('二维码已撤销');
+        } catch (e) { setError('撤销失败：' + (e.message || String(e))); }
+      };
+
       return h('section', { style: { display: 'flex', flexDirection: 'column', gap: '18px', width: '100%', color: 'var(--dsw-alias-label-primary, inherit)' } },
         h('header', { style: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' } },
           h('div', null,
-            h('div', { style: { fontSize: '19px', fontWeight: 700, letterSpacing: '-.02em' } }, c.title),
+            h('div', { style: { fontSize: '19px', fontWeight: 700 } }, c.title),
             h('div', { style: { marginTop: '5px', fontSize: '12px', color: 'var(--dsw-alias-label-tertiary, #888)' } }, c.subtitle),
-            h('div', { style: { marginTop: '5px', fontSize: '11px', color: 'var(--dsw-alias-label-tertiary, #888)' } }, c.version)
+            h('div', { style: { marginTop: '5px', fontSize: '11px', color: 'var(--dsw-alias-label-tertiary, #888)' } }, '版本 1.0.2')
           ),
           h('div', { role: 'group', 'aria-label': c.language, style: { display: 'flex', gap: '4px', padding: '3px', borderRadius: '10px', background: 'var(--dsw-alias-bg-layer-2, rgba(127,127,127,.08))' } },
             ...[['zh', c.chinese], ['en', c.english]].map(([key, label]) => h('button', {
@@ -70,39 +142,33 @@ window.__ModuleLoader__.load({
             }, label))
           )
         ),
-        h('section', { style: { display: 'flex', flexDirection: 'column', gap: '10px' } },
-          h('div', { style: { fontSize: '14px', fontWeight: 650 } }, c.overview),
-          h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--dsw-alias-label-secondary, #777)' } },
-            h('span', { style: { width: '8px', height: '8px', borderRadius: '50%', background: '#2eaa72', display: 'inline-block' } }), c.ready),
-          h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: '9px' } },
-            h(StatusTile, { label: c.desktop, value: c.desktopValue }),
-            h(StatusTile, { label: c.android, value: c.androidValue }),
-            h(StatusTile, { label: c.vision, value: c.visionValue }),
-            h(StatusTile, { label: c.automation, value: c.automationValue })
-          )
-        ),
-        h('section', { style: { padding: '16px', borderRadius: '14px', border: '1px solid var(--dsw-alias-border-l2, rgba(127,127,127,.22))', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(180px,220px)', gap: '18px', alignItems: 'center' } },
+        h('section', { style: { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(180px,220px)', gap: '18px', alignItems: 'center', padding: '16px', borderRadius: '14px', border: '1px solid var(--dsw-alias-border-l2, rgba(127,127,127,.22))' } },
           h('div', { style: { minWidth: 0 } },
             h('div', { style: { fontSize: '15px', fontWeight: 700 } }, c.pairing),
-            h('p', { style: { margin: '7px 0 10px', fontSize: '12px', lineHeight: 1.65, color: 'var(--dsw-alias-label-secondary, #777)' } }, c.pairingHint),
-            h('div', { style: { fontSize: '13px', fontWeight: 650 } }, c.qrUnavailable),
-            h('p', { style: { margin: '6px 0 0', fontSize: '12px', lineHeight: 1.65, color: 'var(--dsw-alias-label-tertiary, #888)' } }, c.qrDetail),
-            h('p', { style: { margin: '7px 0 0', fontSize: '11px', lineHeight: 1.5, color: 'var(--dsw-alias-label-tertiary, #888)' } }, c.qrNote)
-          ),
-          h('div', { style: { minHeight: '176px', borderRadius: '12px', border: '1px dashed var(--dsw-alias-border-l2, rgba(127,127,127,.35))', background: 'var(--dsw-alias-bg-layer-2, rgba(127,127,127,.05))', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px', textAlign: 'center', padding: '14px' } },
-            h('svg', { width: 52, height: 52, viewBox: '0 0 52 52', fill: 'none', 'aria-hidden': true },
-              h('rect', { x: 8, y: 3, width: 26, height: 44, rx: 5, stroke: 'currentColor', strokeWidth: 2 }),
-              h('path', { d: 'M17 10h8M19 40h4', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round' }),
-              h('path', { d: 'M38 17l7 7-7 7M45 24H30', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' })
+            h('p', { style: { fontSize: '12px', lineHeight: 1.65, color: 'var(--dsw-alias-label-secondary, #777)' } }, '页面加载后会自动连接本机 Gamer 桌面服务并生成真实二维码。电脑与手机需要处于同一局域网。'),
+            h('div', { style: { fontSize: '13px', fontWeight: 650 } }, pairState),
+            host ? h('p', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary, #777)' } }, '电脑地址：' + host) : null,
+            h('p', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary, #777)' } }, qr ? ('有效期：' + Math.floor(remaining / 60) + ':' + String(remaining % 60).padStart(2, '0')) : '有效期：未生成'),
+            error ? h('p', { role: 'alert', style: { color: '#c45b50', fontSize: '12px', lineHeight: 1.6 } }, error) : null,
+            addresses.length > 1 ? h('label', { style: { display: 'block', fontSize: '12px', marginTop: '8px' } }, '可用网络：',
+              h('select', { value: host.split(':')[0], onChange: e => generateQr(e.target.value), style: { marginLeft: '6px', maxWidth: '100%' } },
+                ...addresses.map(item => h('option', { key: item.address, value: item.address }, item.name + ' · ' + item.address))
+              )
+            ) : null,
+            h('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' } },
+              h('button', { type: 'button', disabled: busy, onClick: detectAndGenerate, style: { border: 0, borderRadius: '8px', padding: '9px 13px', cursor: busy ? 'wait' : 'pointer' } }, busy ? '正在处理…' : '重新生成二维码'),
+              h('button', { type: 'button', disabled: !qr, onClick: revoke, style: { borderRadius: '8px', padding: '9px 13px', cursor: qr ? 'pointer' : 'not-allowed' } }, '撤销二维码')
             ),
-            h('div', { style: { fontSize: '12px', fontWeight: 650 } }, c.status),
-            h('div', { style: { fontSize: '11px', color: 'var(--dsw-alias-label-tertiary, #888)' } }, 'QR · Pending')
+            h('p', { style: { fontSize: '11px', lineHeight: 1.55, color: 'var(--dsw-alias-label-tertiary, #888)' } }, '安全提示：二维码仅包含 5 分钟有效的一次性配对令牌，不包含模型 API Key。扫码识别不等于认证完成；Android Companion 尚未接入前不会显示已连接。')
+          ),
+          h('div', { style: { minHeight: '190px', borderRadius: '12px', border: '1px dashed var(--dsw-alias-border-l2, rgba(127,127,127,.35))', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px' } },
+            qr ? h('img', { src: qr, alt: 'Gamer 一次性设备配对二维码', style: { width: '100%', maxWidth: '190px', imageRendering: 'pixelated' } }) : h('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-tertiary, #888)', textAlign: 'center' } }, '等待真实二维码…'),
+            h('div', { style: { fontSize: '12px', fontWeight: 650 } }, qr ? 'QR · READY' : 'QR · PENDING')
           )
         ),
         h('section', { style: { padding: '14px', borderRadius: '12px', background: 'var(--dsw-alias-bg-layer-2, rgba(127,127,127,.06))' } },
-          h('div', { style: { fontSize: '13px', fontWeight: 700, marginBottom: '5px' } }, c.roadmap),
-          h('div', { style: { fontSize: '12px', lineHeight: 1.65, color: 'var(--dsw-alias-label-secondary, #777)' } }, c.roadmapText),
-          h('div', { style: { marginTop: '8px', fontSize: '11px', lineHeight: 1.5, color: 'var(--dsw-alias-label-tertiary, #888)' } }, c.noGameControl)
+          h('div', { style: { fontSize: '13px', fontWeight: 700, marginBottom: '5px' } }, c.overview),
+          h('div', { style: { fontSize: '12px', lineHeight: 1.65, color: 'var(--dsw-alias-label-secondary, #777)' } }, 'DSH 插件界面与桌面配对服务通过本机回环地址通信。若服务未启动，请先运行桌面端启动脚本。游戏控制、视觉识别和 Android 双端认证仍需各自运行时实现。')
         ),
         h('a', { href: 'https://github.com/sususgh/Gamer-DSH-Plugin', target: '_blank', rel: 'noreferrer',
           style: { fontSize: '12px', color: 'var(--dsw-alias-label-link, #4b91d1)', textDecoration: 'none' } }, c.repo + ' ↗')
