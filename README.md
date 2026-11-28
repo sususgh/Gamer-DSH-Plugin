@@ -11,6 +11,7 @@ The key design is simple:
 The phone is not expected to host a large language model. It can perform lightweight device-side work, while the computer handles the heavier vision pipeline, game context, model requests, planning, validation, telemetry and coordination.
 
 - **Repository:** https://github.com/sususgh/Gamer-DSH-Plugin
+- **DSH plugin package:** `@sususgh/gamer-dsh-plugin` (install this package name from DSH Plugins → Add plugin)
 - **Companion project:** Gamer-Mobile (Android)
 - **Primary target:** Windows desktop + Android phone
 - **DSH role:** agent entry point, tool orchestration, session and task coordination
