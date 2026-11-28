@@ -19,9 +19,22 @@ The phone is not expected to host a large language model. It can perform lightwe
 - **Desktop role:** main processing, local game control, model routing, device bridge and telemetry
 - **Android role:** mobile game runtime, screen/audio/sensor observations when permitted, touch execution and acknowledgements
 
-> **Project status:** This repository is being bootstrapped. The first desktop UI shell is a visual prototype. Network values, model health and device status are not real until their runtime adapters are connected and tested. This README describes the intended architecture and integration contract; it does not claim that every planned feature is already implemented.
+> **Project status:** This repository is being bootstrapped. The DSH plugin page now attempts to connect to the local desktop pairing service at `127.0.0.1:8765` and automatically generates a short-lived QR code when that service is running. The desktop server provides QR generation and a scan landing page; Android companion authentication is not yet implemented. Network values, model health and device status are not real until their runtime adapters are connected and tested. This README describes the intended architecture and integration contract; it does not claim that every planned feature is already implemented.
 
 ---
+
+## Start the desktop QR pairing service
+
+Requirements: Node.js 22.13 or newer.
+
+```bash
+npm install
+npm run desktop
+```
+
+The desktop service listens on port 8765 and prints the computer's private LAN IPv4 address. Keep it running while using the DSH plugin page. The plugin page connects to `http://127.0.0.1:8765`, discovers a private LAN address and requests a fresh QR code automatically. On Windows, run the same commands in PowerShell or Command Prompt.
+
+If the browser blocks local-network access, allow the DSH application to access the local network and retry. The local API accepts browser origins from `deepseek.com` subdomains and localhost only. QR tokens expire after five minutes. Scanning the QR currently validates the one-time token and opens a landing page; it does **not** complete Android authentication or establish a connected companion session.
 
 ## 1. What the project does
 
