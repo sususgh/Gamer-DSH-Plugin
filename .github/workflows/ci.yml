@@ -23,7 +23,7 @@ jobs:
           node-version: 22
       - name: Check plugin JavaScript syntax
         run: npm run check
-      - name: Run plugin tests
+      - name: Run plugin and runtime safety tests
         run: npm test
       - name: Validate npm package contents
         run: npm pack --dry-run
