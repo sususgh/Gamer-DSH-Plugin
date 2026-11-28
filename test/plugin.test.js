@@ -2,13 +2,21 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { apply } from '../dsh/index.js';
 
-test('registers a DSH status tool and reports implementation honestly', async () => {
+test('registers model discovery and status tools with live DSH services', async () => {
   const registered = [];
-  apply({ tools: { register: (tool) => registered.push(tool) } });
-  assert.equal(registered.length, 1);
-  assert.equal(registered[0].name, 'gamer_project_status');
-  const status = await registered[0].execute({});
-  assert.equal(status.pluginLoaded, true);
+  const ctx = {
+    tools: { register: tool => registered.push(tool) },
+    llm: { listProviders: async () => [], listModels: async () => [] },
+  };
+  apply(ctx);
+  assert.deepEqual(registered.map(tool => tool.name).sort(), [
+    'gamer_list_ai_models',
+    'gamer_project_status',
+  ]);
+  const statusTool = registered.find(tool => tool.name === 'gamer_project_status');
+  const status = await statusTool.execute({});
+  assert.equal(status.project, 'Gamer-DSH-Plugin');
   assert.equal(status.canControlGames, false);
-  assert.equal(status.gameControlRuntime, 'not implemented');
+  assert.match(status.gameControlRuntime, /not connected/);
+  assert.match(status.modelDiscovery, /No registered model provider/);
 });
