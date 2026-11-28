@@ -16,7 +16,10 @@ if errorlevel 1 (
 if not exist "node_modules\qrcode" (
   echo [Gamer] Installing desktop QR dependencies...
   npm install --no-audit --no-fund
-  if errorlevel 1 pause & exit /b 1
+  if errorlevel 1 (
+    pause
+    exit /b 1
+  )
 )
 echo [Gamer] Starting desktop pairing service...
 npm start
