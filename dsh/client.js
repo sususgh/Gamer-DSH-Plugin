@@ -7,7 +7,7 @@ window.__ModuleLoader__.load({
 
     const COPY = {
       zh: {
-        title: 'Gamer 游戏智能体', subtitle: 'PC 游戏控制中心 · Android 手机伴侣', version: '版本 1.0.1',
+        title: 'Gamer 游戏智能体', subtitle: 'PC 游戏控制中心 · Android 手机伴侣', version: '版本 1.0.5',
         overview: '运行状态', ready: 'DSH 插件入口已加载',
         desktop: '桌面端控制台', desktopValue: '界面框架已提供，游戏运行时尚未接入',
         android: 'Android 手机伴侣', androidValue: '通信服务尚未接入',
@@ -23,7 +23,7 @@ window.__ModuleLoader__.load({
         status: '未连接', noGameControl: '当前版本不会控制游戏或发送键鼠/触控指令。'
       },
       en: {
-        title: 'Gamer AI Agent', subtitle: 'PC game control center · Android companion', version: 'Version 1.0.1',
+        title: 'Gamer AI Agent', subtitle: 'PC game control center · Android companion', version: 'Version 1.0.5',
         overview: 'Runtime status', ready: 'Native DSH plugin entry loaded',
         desktop: 'Desktop control center', desktopValue: 'UI shell is present; game runtime is not connected',
         android: 'Android companion', androidValue: 'Communication service is not connected',
@@ -31,7 +31,7 @@ window.__ModuleLoader__.load({
         automation: 'Automatic gameplay', automationValue: 'Not implemented; no game actions are executed',
         pairing: 'QR device pairing', pairingHint: 'Pair an Android phone securely after the companion service is available.',
         qrUnavailable: 'QR pairing service is not connected',
-        qrDetail: 'This release has no desktop pairing server yet, so it cannot generate a real, scannable connection QR code.',
+        qrDetail: 'The desktop pairing service must be running locally. Set the same custom port here and in the startup script to generate a real QR code.',
         qrNote: 'No fake QR code is shown and no device is reported as connected.',
         roadmap: 'Next steps', roadmapText: 'Implement the desktop pairing service and Android companion before enabling QR generation, two-sided authentication and device status sync.',
         repo: 'View GitHub project and development progress', language: 'Language', chinese: '简体中文', english: 'English',
@@ -60,8 +60,10 @@ window.__ModuleLoader__.load({
       const [error, setError] = React.useState('');
       const [busy, setBusy] = React.useState(false);
       const [addresses, setAddresses] = React.useState([]);
+      const [port, setPort] = React.useState(() => { try { return localStorage.getItem('gamer.desktop.port') || '8765'; } catch { return '8765'; } });
       const c = COPY[language];
-      const base = 'http://127.0.0.1:8765';
+      const validPort = /^([1-9][0-9]{0,4})$/.test(port) && Number(port) <= 65535;
+      const base = 'http://127.0.0.1:' + (validPort ? port : '8765');
 
       const generateQr = React.useCallback(async (selectedHost) => {
         if (!selectedHost) return;
@@ -82,7 +84,7 @@ window.__ModuleLoader__.load({
         } catch (e) {
           setQr(''); setPairState('二维码生成失败'); setError(e.message || String(e));
         } finally { setBusy(false); }
-      }, []);
+      }, [base]);
 
       const detectAndGenerate = React.useCallback(async () => {
         setBusy(true); setError(''); setPairState('正在检测桌面配对服务…');
@@ -97,10 +99,10 @@ window.__ModuleLoader__.load({
           await generateQr(selected);
         } catch (e) {
           setQr(''); setPairState('桌面配对服务不可用');
-          setError((e.message || String(e)) + '。请先在电脑运行 Gamer 桌面端启动脚本，并确认端口 8765 可用。');
+          setError((e.message || String(e)) + '。请先在电脑运行 Gamer 桌面端启动脚本，并确认本机端口 ' + port + ' 可用；如修改端口，请确保启动脚本与此处填写一致。');
           setBusy(false);
         }
-      }, [generateQr]);
+      }, [generateQr, base]);
 
       React.useEffect(() => {
         let alive = true;
@@ -150,8 +152,14 @@ window.__ModuleLoader__.load({
         h('section', { style: { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(180px,220px)', gap: '18px', alignItems: 'center', padding: '16px', borderRadius: '14px', border: '1px solid var(--dsw-alias-border-l2, rgba(127,127,127,.22))' } },
           h('div', { style: { minWidth: 0 } },
             h('div', { style: { fontSize: '15px', fontWeight: 700 } }, c.pairing),
-            h('p', { style: { fontSize: '12px', lineHeight: 1.65, color: 'var(--dsw-alias-label-secondary, #777)' } }, '页面加载后会自动连接本机 Gamer 桌面服务并生成真实二维码。电脑与手机需要处于同一局域网。'),
-            h('div', { style: { fontSize: '13px', fontWeight: 650 } }, pairState),
+            h('p', { style: { fontSize: '12px', lineHeight: 1.65, color: 'var(--dsw-alias-label-secondary, #777)' } }, '页面加载后会自动连接本机 Gamer 桌面服务并生成真实二维码。电脑与手机需要处于同一局域网。可自定义桌面服务端口，并与启动脚本中的端口保持一致。'),
+            h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', margin: '10px 0' } },
+            h('label', { htmlFor: 'gamer-local-port', style: { fontSize: '12px' } }, '桌面服务端口 / Desktop port'),
+            h('input', { id: 'gamer-local-port', type: 'number', min: 1, max: 65535, step: 1, value: port, onChange: e => setPort(e.target.value), onBlur: () => { try { localStorage.setItem('gamer.desktop.port', port); } catch {} }, style: { width: '92px', padding: '7px 9px', borderRadius: '8px', border: '1px solid var(--dsw-alias-border-l2, #aaa)', background: 'var(--dsw-alias-bg-layer-1, transparent)', color: 'inherit' } }),
+            h('button', { type: 'button', disabled: busy || !validPort, onClick: () => { try { localStorage.setItem('gamer.desktop.port', port); } catch {} detectAndGenerate(); }, style: { borderRadius: '8px', padding: '7px 10px' } }, '应用端口并重连')
+          ),
+          !validPort ? h('p', { role: 'alert', style: { color: '#c45b50', fontSize: '12px' } }, '端口必须是 1–65535 的整数。') : null,
+          h('div', { style: { fontSize: '13px', fontWeight: 650 } }, pairState),
             host ? h('p', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary, #777)' } }, '电脑地址：' + host) : null,
             h('p', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-secondary, #777)' } }, qr ? ('有效期：' + Math.floor(remaining / 60) + ':' + String(remaining % 60).padStart(2, '0')) : '有效期：未生成'),
             error ? h('p', { role: 'alert', style: { color: '#c45b50', fontSize: '12px', lineHeight: 1.6 } }, error) : null,
@@ -173,7 +181,7 @@ window.__ModuleLoader__.load({
         ),
         h('section', { style: { padding: '14px', borderRadius: '12px', background: 'var(--dsw-alias-bg-layer-2, rgba(127,127,127,.06))' } },
           h('div', { style: { fontSize: '13px', fontWeight: 700, marginBottom: '5px' } }, c.overview),
-          h('div', { style: { fontSize: '12px', lineHeight: 1.65, color: 'var(--dsw-alias-label-secondary, #777)' } }, 'DSH 插件界面与桌面配对服务通过本机回环地址通信。若服务未启动，请先运行桌面端启动脚本。游戏控制、视觉识别和 Android 双端认证仍需各自运行时实现。')
+          h('div', { style: { fontSize: '12px', lineHeight: 1.65, color: 'var(--dsw-alias-label-secondary, #777)' } }, 'DSH 插件界面与桌面配对服务通过本机回环地址通信。若服务未启动，请先运行桌面端启动脚本。端口可在上方自定义；若仍出现 Failed to fetch，请检查服务是否运行、端口是否一致以及 DSH 是否允许本地网络访问。游戏控制、视觉识别和 Android 双端认证仍需各自运行时实现。')
         ),
         h('a', { href: 'https://github.com/sususgh/Gamer-DSH-Plugin', target: '_blank', rel: 'noreferrer',
           style: { fontSize: '12px', color: 'var(--dsw-alias-label-link, #4b91d1)', textDecoration: 'none' } }, c.repo + ' ↗')
