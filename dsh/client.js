@@ -116,8 +116,13 @@ window.__ModuleLoader__.load({
       }, [qr, remaining > 0]);
 
       React.useEffect(() => {
-        if (qr && remaining === 0) { setQr(''); setPairState('二维码已过期，请重新生成'); }
-      }, [remaining, qr]);
+        if (qr && remaining === 0) {
+          setQr('');
+          setPairState('二维码已过期，正在自动刷新…');
+          const address = host.split(':')[0];
+          if (address) generateQr(address);
+        }
+      }, [remaining, qr, host, generateQr]);
 
       const revoke = async () => {
         try {
