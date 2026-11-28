@@ -1,54 +1,118 @@
 /**
- * Gamer DSH Plugin — native DeepSeek Harness entry point.
+ * Gamer DSH Plugin — model-aware native Harness integration.
  *
- * This first installable integration deliberately reports the current runtime
- * honestly: the repository currently contains a desktop UI prototype, not a
- * connected game-control engine. No game input is sent and no device is
- * paired by this plugin yet.
+ * The plugin reads the registered DSH model routes through ctx.llm and exposes
+ * that inventory as a model-callable tool. It does not claim gameplay control
+ * until an authenticated desktop/Android runtime is connected.
  */
-
 export const name = 'gamer-dsh-plugin';
-export const inject = ['tools'];
+export const inject = ['tools', 'llm'];
 
-const STATUS_SCHEMA = {
+const EMPTY_SCHEMA = {
   type: 'object',
   properties: {},
   additionalProperties: false,
 };
 
-export function apply(ctx) {
+const JSON_OUTPUT = {
+  schema: {
+    type: 'object',
+    properties: {
+      status: { type: 'string' },
+      providers: { type: 'array', items: { type: 'object' } },
+      count: { type: 'integer' },
+      message: { type: 'string' },
+    },
+    required: ['status', 'providers', 'count', 'message'],
+    additionalProperties: false,
+  },
+  render: (_args, value) => [{
+    type: 'text',
+    text: JSON.stringify(value, null, 2),
+  }],
+  presentationMeta: () => ({}),
+};
+
+function register(ctx, definition) {
   if (typeof ctx?.tools?.register !== 'function') {
-    console.error('[gamer-dsh-plugin] DSH tools service is unavailable; status tool was not registered.');
+    throw new Error('DSH_TOOLS_SERVICE_UNAVAILABLE');
+  }
+  ctx.tools.register(definition);
+}
+
+export function apply(ctx) {
+  if (!ctx?.llm || typeof ctx.llm.listProviders !== 'function'
+      || typeof ctx.llm.listModels !== 'function') {
+    console.error('[gamer-dsh-plugin] DSH llm service unavailable; model discovery tool was not registered.');
     return;
   }
 
-  ctx.tools.register({
+  register(ctx, {
+    name: 'gamer_list_ai_models',
+    description:
+      'List AI model providers and models currently registered in this DeepSeek Harness instance. Use this before selecting a model for Gamer gameplay. This reads the Harness model registry; it does not expose API keys or secrets.',
+    parameters: EMPTY_SCHEMA,
+    output: JSON_OUTPUT,
+    async execute() {
+      const providers = await ctx.llm.listProviders();
+      const inventory = await Promise.all(providers.map(async provider => {
+        try {
+          const models = await ctx.llm.listModels(provider.id);
+          return {
+            provider: provider.id,
+            providerName: provider.name,
+            models: models.map(model => ({
+              id: model.id,
+              name: model.name ?? model.id,
+              ...(model.contextWindow ? { contextWindow: model.contextWindow } : {}),
+            })),
+            available: true,
+          };
+        } catch (error) {
+          return {
+            provider: provider.id,
+            providerName: provider.name,
+            models: [],
+            available: false,
+            error: error?.message || 'MODEL_DISCOVERY_FAILED',
+          };
+        }
+      }));
+      const count = inventory.reduce((sum, item) => sum + item.models.length, 0);
+      return {
+        status: inventory.length ? 'providers_found' : 'no_provider_registered',
+        providers: inventory,
+        count,
+        message: inventory.length
+          ? 'Model registry read from DSH. The model calling this tool remains the active conversation model; API credentials were not returned.'
+          : 'No active LLM provider adapter is registered in DSH. Configure and enable a provider before starting Gamer.',
+      };
+    },
+  });
+
+  register(ctx, {
     name: 'gamer_project_status',
     description:
-      'Return the verified implementation and runtime status of Gamer-DSH-Plugin. The v1.0.2 release includes a bilingual DSH plugin configuration page, but it includes a desktop QR pairing server and automatic QR display in the DSH page; Android companion authentication and game-control runtime are not implemented.',
-    parameters: STATUS_SCHEMA,
+      'Return verified Gamer runtime status. Distinguish model discovery from an authenticated Android connection and real gameplay control.',
+    parameters: EMPTY_SCHEMA,
     output: {
       schema: {
         type: 'object',
         properties: {
           project: { type: 'string' },
           version: { type: 'string' },
-          integration: { type: 'string' },
-          pluginLoaded: { type: 'boolean' },
-          desktopUi: { type: 'string' },
+          modelDiscovery: { type: 'string' },
           androidCompanion: { type: 'string' },
           visionRuntime: { type: 'string' },
           gameControlRuntime: { type: 'string' },
-          qrPairing: { type: 'string' },
           canControlGames: { type: 'boolean' },
           nextStep: { type: 'string' },
           repository: { type: 'string' },
-          release: { type: 'string' },
         },
         required: [
-          'project', 'version', 'integration', 'pluginLoaded', 'desktopUi',
-          'androidCompanion', 'visionRuntime', 'gameControlRuntime', 'qrPairing',
-          'canControlGames', 'nextStep', 'repository', 'release',
+          'project', 'version', 'modelDiscovery', 'androidCompanion',
+          'visionRuntime', 'gameControlRuntime', 'canControlGames',
+          'nextStep', 'repository',
         ],
         additionalProperties: false,
       },
@@ -59,21 +123,20 @@ export function apply(ctx) {
       presentationMeta: () => ({}),
     },
     async execute() {
+      const providers = await ctx.llm.listProviders();
       return {
         project: 'Gamer-DSH-Plugin',
-        version: '1.0.2',
-        integration: 'native DSH bundle',
-        pluginLoaded: true,
-        desktopUi: 'plugin configuration page available; game-control dashboard prototype',
-        androidCompanion: 'not connected',
+        version: '1.0.2-dev',
+        modelDiscovery: providers.length
+          ? providers.map(item => item.name || item.id).join(', ')
+          : 'No registered model provider',
+        androidCompanion: 'not authenticated; Android handshake not implemented',
         visionRuntime: 'not implemented',
-        gameControlRuntime: 'not implemented',
-        qrPairing: 'desktop QR generation implemented; Android companion authentication not implemented',
+        gameControlRuntime: 'not connected; no game actions can be executed',
         canControlGames: false,
-        nextStep: 'Run the desktop pairing service and connect the Android companion authentication bridge before enabling game-control tools.',
+        nextStep: 'Complete authenticated desktop-to-Android session transport, screen capture, vision inference and input adapters; run device acceptance tests.',
         repository: 'https://github.com/sususgh/Gamer-DSH-Plugin',
-        release: 'https://github.com/sususgh/Gamer-DSH-Plugin/releases/tag/v1.0.2'
       };
-    }
+    },
   });
 }
