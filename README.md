@@ -19,24 +19,51 @@ The phone is not expected to host a large language model. It can perform lightwe
 - **Desktop role:** main processing, local game control, model routing, device bridge and telemetry
 - **Android role:** mobile game runtime, screen/audio/sensor observations when permitted, touch execution and acknowledgements
 
-> **Project status:** This repository is being bootstrapped. The DSH plugin page now attempts to connect to the local desktop pairing service at `127.0.0.1:8765` and automatically generates a short-lived QR code when that service is running. The desktop server provides QR generation and a scan landing page; Android companion authentication is not yet implemented. Network values, model health and device status are not real until their runtime adapters are connected and tested. This README describes the intended architecture and integration contract; it does not claim that every planned feature is already implemented.
-
----
-
-## Start the desktop QR pairing service
-
-Requirements: Node.js 22.13 or newer.
-
-```bash
-npm install
-npm run desktop
-```
-
-The desktop service listens on port 8765 and prints the computer's private LAN IPv4 address. Keep it running while using the DSH plugin page. The plugin page connects to `http://127.0.0.1:8765`, discovers a private LAN address and requests a fresh QR code automatically. On Windows, run the same commands in PowerShell or Command Prompt.
-
-If the browser blocks local-network access, allow the DSH application to access the local network and retry. The local API accepts browser origins from `deepseek.com` subdomains and localhost only. QR tokens expire after five minutes. Scanning the QR currently validates the one-time token and opens a landing page; it does **not** complete Android authentication or establish a connected companion session.
-
-## DSH model registry integration
+> **项目状态 / Project status:** DSH 插件页通过本机回环地址连接 Gamer 桌面配对服务。默认端口为 `8765`，可在启动脚本中自定义；插件页的“桌面服务端口”必须填写相同端口。二维码令牌有效 5 分钟。配对认证、屏幕采集、触控和游戏推理能力请以各模块实际状态为准，不会将未接入功能标记为已完成。
+>
+> The DSH plugin connects to the local Gamer desktop pairing service. The default port is `8765`; choose a custom port in the startup script and enter the same value in the plugin's Desktop port field. QR tokens expire after five minutes. Capabilities are reported only when their runtime adapters are implemented and tested.
+>
+> ---
+>
+> ## 启动电脑端配对服务 / Start the desktop pairing service
+>
+> 要求 / Requirements: Node.js 22.13 or newer.
+>
+> **Windows：** 双击仓库根目录的 `start-windows.bat`，按提示输入端口（直接回车使用 8765）。脚本会自动安装桌面运行时依赖并启动服务。
+>
+> **Linux / Debian / Ubuntu：**
+>
+> ```bash
+> bash start-linux.sh
+> ```
+>
+> 按提示输入端口（默认 8765）。脚本会自动安装依赖并启动服务。
+>
+> **手动启动 / Manual start：**
+>
+> ```bash
+> cd desktop-runtime
+> npm install
+> ```
+>
+> Windows PowerShell:
+>
+> ```powershell
+> $env:GAMER_PORT = "8765"
+> npm start
+> ```
+>
+> Linux:
+>
+> ```bash
+> GAMER_PORT=8765 npm start
+> ```
+>
+> 将 `8765` 替换为 1–65535 范围内未被占用的端口。启动后保持终端窗口运行。打开 DSH 插件页，在“桌面服务端口 / Desktop port”填写相同端口并点击“应用端口并重连”。电脑和手机需处于同一可信任局域网。
+>
+> 若页面显示 `Failed to fetch`，请依次检查：① 启动脚本窗口是否仍在运行；② 插件页端口与启动端口是否一致；③ 端口是否被其他程序占用或被防火墙拦截；④ DSH 是否允许本地网络访问。不要直接双击 `desktop-ui/index.html`，必须由桌面服务提供页面。不要将此 HTTP 服务或端口映射到公网。
+>
+> ## DSH model registry integration
 
 The plugin now injects the Harness `llm` service and registers the model-callable tool `gamer_list_ai_models`. When invoked by the active DSH model, it reads currently registered provider routes with `ctx.llm.listProviders()` and each provider's advertised models with `ctx.llm.listModels(provider)`. It returns provider/model identifiers and availability only; it never returns API keys or secret values.
 
