@@ -52,7 +52,7 @@
   },
   "scripts": {
     "test": "node --test",
-    "check": "node --check dsh/index.js && node --check dsh/client.js && node --check desktop-runtime/pairing.js && node --check desktop-runtime/server.js && node --check desktop-ui/app.js",
+    "check": "node --check dsh/index.js && node --check dsh/client.js && node --check desktop-runtime/pairing.js && node --check desktop-runtime/server.js && node --check desktop-ui/app.js && node --check desktop-runtime/engine/safety-gate.js",
     "desktop": "node desktop-runtime/server.js",
     "start:desktop": "node desktop-runtime/server.js"
   },
