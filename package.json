@@ -22,10 +22,13 @@
   ],
   "files": [
     "dsh",
+    "desktop-runtime",
+    "desktop-ui",
     "cordis.patch.yml",
     "README.md",
     "LICENSE",
     "docs/DSH-INSTALL.zh-CN.md",
+    "docs/runtime-protocol-v1.md",
     "locale"
   ],
   "exports": {
